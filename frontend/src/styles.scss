@@ -144,3 +144,89 @@ button { font: inherit; cursor: pointer; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ── Dashboard page furniture ──────────────────────────────────── */
+/* Global rather than per-component, since every dashboard page uses them. */
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.page-head__title {
+  font-size: 22px;
+}
+
+.page-head__sub {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+.panel {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 44px 20px;
+  text-align: center;
+}
+
+.empty__icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.empty__title {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.empty__text {
+  max-width: 44ch;
+  font-size: 14px;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.stat__label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stat__value {
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}

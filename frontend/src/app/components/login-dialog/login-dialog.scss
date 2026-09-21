@@ -134,3 +134,24 @@
 @media (max-width: 480px) {
   .login__card { padding: 30px 22px 26px; }
 }
+
+.login__error {
+  margin-top: 18px;
+  padding: 10px 13px;
+  border: 1px solid #f3c9c4;
+  border-radius: 4px;
+  background: #fdecea;
+  color: #8f2b24;
+  font-size: 13px;
+  text-align: left;
+}
+
+.login__submit[disabled] {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.field__input[disabled] {
+  background: var(--surface-alt);
+  cursor: not-allowed;
+}

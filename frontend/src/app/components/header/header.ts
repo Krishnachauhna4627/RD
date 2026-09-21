@@ -1,5 +1,7 @@
-import { Component, HostListener, signal } from '@angular/core';
-import { Credentials, LoginDialog } from '../login-dialog/login-dialog';
+import { Component, HostListener, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { LoginDialog } from '../login-dialog/login-dialog';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface NavLink {
   label: string;
@@ -7,12 +9,16 @@ interface NavLink {
 }
 
 @Component({
-  imports: [LoginDialog],
+  imports: [LoginDialog, RouterLink],
   selector: 'app-header',
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
 export class Header {
+  private readonly auth = inject(AuthService);
+
+  protected readonly isLoggedIn = this.auth.isLoggedIn;
+
   protected readonly links: NavLink[] = [
     { label: 'Home', href: '#home' },
     { label: 'About Us', href: '#about' },
@@ -48,9 +54,4 @@ export class Header {
     this.loginOpen.set(false);
   }
 
-  protected onLogin(credentials: Credentials): void {
-    // Hook this up to the auth backend once it exists.
-    console.log('login', credentials.username);
-    this.closeLogin();
-  }
 }

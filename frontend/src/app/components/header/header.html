@@ -14,7 +14,11 @@
           >{{ link.label }}</a
         >
       }
-      <button class="nav__link nav__login" type="button" (click)="openLogin()">Login</button>
+      @if (isLoggedIn()) {
+        <a class="nav__link nav__login" routerLink="/dashboard" (click)="select('#dashboard')">Dashboard</a>
+      } @else {
+        <button class="nav__link nav__login" type="button" (click)="openLogin()">Login</button>
+      }
 
       <a class="btn btn--primary nav__cta" href="#contact" (click)="select('#contact')">Get a Quote</a>
     </nav>
@@ -59,5 +63,5 @@
 }
 
 @if (loginOpen()) {
-  <app-login-dialog (closed)="closeLogin()" (submitted)="onLogin($event)" />
+  <app-login-dialog (closed)="closeLogin()" />
 }

@@ -12,6 +12,10 @@
     <h2 class="login__title" id="login-title">Sign in</h2>
     <p class="login__text">Access your RD Enterprises account.</p>
 
+    @if (error()) {
+      <p class="login__error" role="alert">{{ error() }}</p>
+    }
+
     <form class="login__form" (ngSubmit)="submit()">
       <label class="field">
         <span class="field__label">Username</span>
@@ -22,6 +26,7 @@
           autocomplete="username"
           placeholder="Enter your username"
           required
+          [disabled]="submitting()"
           [ngModel]="username()"
           (ngModelChange)="username.set($event)"
         />
@@ -37,6 +42,7 @@
             autocomplete="current-password"
             placeholder="Enter your password"
             required
+            [disabled]="submitting()"
             [ngModel]="password()"
             (ngModelChange)="password.set($event)"
           />
@@ -64,7 +70,9 @@
         </span>
       </label>
 
-      <button class="btn btn--primary login__submit" type="submit">Login</button>
+      <button class="btn btn--primary login__submit" type="submit" [disabled]="submitting()">
+        {{ submitting() ? 'Signing in…' : 'Login' }}
+      </button>
     </form>
   </div>
 </div>
