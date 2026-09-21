@@ -60,6 +60,14 @@
   }
 }
 
+/* The Login entry is a button, so it needs the anchor defaults reset. */
+.nav__login {
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+}
+
 /* Only shown inside the mobile drawer. */
 .nav__cta { display: none; }
 
@@ -137,6 +145,8 @@
 
     &::after { display: none; }
   }
+
+  .nav__login { width: 100%; }
 
   .nav__cta {
     display: inline-flex;

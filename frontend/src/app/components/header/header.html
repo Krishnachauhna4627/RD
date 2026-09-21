@@ -14,6 +14,8 @@
           >{{ link.label }}</a
         >
       }
+      <button class="nav__link nav__login" type="button" (click)="openLogin()">Login</button>
+
       <a class="btn btn--primary nav__cta" href="#contact" (click)="select('#contact')">Get a Quote</a>
     </nav>
 
@@ -54,4 +56,8 @@
 
 @if (menuOpen()) {
   <button class="scrim" type="button" tabindex="-1" aria-hidden="true" (click)="toggleMenu()"></button>
+}
+
+@if (loginOpen()) {
+  <app-login-dialog (closed)="closeLogin()" (submitted)="onLogin($event)" />
 }
