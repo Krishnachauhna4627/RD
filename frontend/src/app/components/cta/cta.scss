@@ -1,0 +1,33 @@
+.cta { background: var(--surface-alt); }
+
+.cta__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: clamp(24px, 4vw, 48px);
+}
+
+.cta__copy { flex: 1 1 420px; }
+
+.cta__title {
+  font-size: clamp(23px, 3.1vw, 31px);
+  line-height: 1.26;
+}
+
+.cta__text { margin-top: 12px; }
+
+.cta__btn {
+  flex: none;
+  padding: 15px 30px;
+  font-size: 15px;
+}
+
+@media (max-width: 760px) {
+  .cta__title br { display: none; }
+
+  .cta__btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

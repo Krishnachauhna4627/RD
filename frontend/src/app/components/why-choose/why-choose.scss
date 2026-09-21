@@ -1,0 +1,84 @@
+.why__title {
+  margin-bottom: 40px;
+  font-size: clamp(26px, 3.4vw, 34px);
+}
+
+.why__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.reason {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding-inline: clamp(16px, 2.4vw, 30px);
+  border-left: 1px solid var(--line);
+
+  &:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+.reason__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border: 1.5px solid var(--green);
+  border-radius: 50%;
+}
+
+.reason__title {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.reason__text {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* ── Responsive: 4 → 2 → 1, redrawing the dividers each time ───── */
+@media (max-width: 900px) {
+  .why__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 30px 0;
+  }
+
+  .reason {
+    padding-inline: clamp(16px, 3vw, 28px);
+    border-left: 1px solid var(--line);
+  }
+
+  .reason:nth-child(odd) {
+    padding-left: 0;
+    border-left: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .why__title { margin-bottom: 28px; }
+
+  .why__grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .reason {
+    padding-inline: 0;
+    border-left: 0;
+  }
+
+  .reason__icon {
+    width: 46px;
+    height: 46px;
+  }
+}

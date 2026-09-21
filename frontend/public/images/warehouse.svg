@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 430" role="img"
+     aria-label="Warehouse aisle stacked with wrapped pallets of stock">
+  <defs>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a9adae"/><stop offset="1" stop-color="#787d7f"/>
+    </linearGradient>
+    <linearGradient id="wrap" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#d3d7d7"/><stop offset=".45" stop-color="#f7f7f5"/><stop offset="1" stop-color="#bdc2c2"/>
+    </linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eceeee"/><stop offset="1" stop-color="#c8cccc"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="640" height="430" fill="#c2c6c6"/>
+
+  <!-- ceiling with trusses -->
+  <path d="M0 0h640v92l-192 44H192L0 92z" fill="url(#sky)"/>
+  <g stroke="#b0b5b5" stroke-width="3" fill="none">
+    <path d="M0 26l208 64M640 26L432 90M0 58l216 62M640 58L424 120"/>
+  </g>
+  <g fill="#fdfdfb">
+    <rect x="228" y="18" width="184" height="9" rx="4"/>
+    <rect x="246" y="52" width="148" height="8" rx="4"/>
+  </g>
+
+  <!-- back wall and roller door -->
+  <rect x="192" y="116" width="256" height="132" fill="#adb2b2"/>
+  <rect x="254" y="146" width="132" height="102" fill="#8e9494"/>
+  <g stroke="#7d8383" stroke-width="2">
+    <path d="M254 166h132M254 186h132M254 206h132M254 226h132"/>
+  </g>
+
+  <!-- floor -->
+  <path d="M0 300h640v130H0z" fill="url(#floor)"/>
+  <path d="M192 248L0 300h640L448 248z" fill="#9aa0a0"/>
+  <path d="M250 300 192 430M390 300l58 130" stroke="#f0c33c" stroke-width="3" opacity=".45" fill="none"/>
+
+  <!-- racking -->
+  <g fill="#6f7576">
+    <rect x="6" y="116" width="16" height="216"/><rect x="152" y="146" width="13" height="170"/>
+    <rect x="475" y="146" width="13" height="170"/><rect x="618" y="116" width="16" height="216"/>
+  </g>
+  <g fill="#878d8e">
+    <rect x="6" y="196" width="159" height="10"/><rect x="6" y="260" width="159" height="10"/>
+    <rect x="475" y="196" width="159" height="10"/><rect x="475" y="260" width="159" height="10"/>
+  </g>
+
+  <!-- shrink-wrapped pallets, both racks -->
+  <g stroke="#a6acac" stroke-width="1.5">
+    <g fill="url(#wrap)">
+      <rect x="22" y="126" width="126" height="68" rx="3"/><rect x="26" y="206" width="120" height="52" rx="3"/>
+      <rect x="30" y="270" width="114" height="46" rx="3"/>
+      <rect x="492" y="126" width="126" height="68" rx="3"/><rect x="496" y="206" width="120" height="52" rx="3"/>
+      <rect x="500" y="270" width="114" height="46" rx="3"/>
+    </g>
+    <!-- kraft cartons showing through the wrap -->
+    <g fill="#c79a63" opacity=".8" stroke="none">
+      <rect x="32" y="136" width="50" height="24"/><rect x="88" y="136" width="50" height="24"/>
+      <rect x="32" y="164" width="50" height="24"/><rect x="88" y="164" width="50" height="24"/>
+      <rect x="36" y="216" width="50" height="34"/><rect x="92" y="216" width="46" height="34"/>
+      <rect x="40" y="280" width="48" height="28"/><rect x="94" y="280" width="42" height="28"/>
+      <rect x="502" y="136" width="50" height="24"/><rect x="558" y="136" width="50" height="24"/>
+      <rect x="502" y="164" width="50" height="24"/><rect x="558" y="164" width="50" height="24"/>
+      <rect x="506" y="216" width="50" height="34"/><rect x="562" y="216" width="46" height="34"/>
+      <rect x="510" y="280" width="48" height="28"/><rect x="564" y="280" width="42" height="28"/>
+    </g>
+  </g>
+
+  <!-- pallets down the centre of the aisle -->
+  <g stroke="#a6acac" stroke-width="1.5">
+    <g fill="url(#wrap)">
+      <rect x="198" y="248" width="88" height="66" rx="3"/>
+      <rect x="296" y="260" width="74" height="54" rx="3"/>
+      <rect x="380" y="246" width="82" height="68" rx="3"/>
+    </g>
+    <g fill="#c79a63" opacity=".8" stroke="none">
+      <rect x="206" y="256" width="34" height="24"/><rect x="246" y="256" width="32" height="24"/>
+      <rect x="206" y="284" width="34" height="24"/><rect x="246" y="284" width="32" height="24"/>
+      <rect x="304" y="268" width="28" height="38"/><rect x="338" y="268" width="26" height="38"/>
+      <rect x="388" y="254" width="32" height="26"/><rect x="426" y="254" width="30" height="26"/>
+      <rect x="388" y="284" width="32" height="24"/><rect x="426" y="284" width="30" height="24"/>
+    </g>
+  </g>
+
+  <!-- wooden pallet bases -->
+  <g fill="#9c7c50">
+    <rect x="198" y="314" width="88" height="13"/><rect x="296" y="314" width="74" height="13"/>
+    <rect x="380" y="314" width="82" height="13"/>
+    <rect x="30" y="316" width="114" height="14"/><rect x="500" y="316" width="114" height="14"/>
+  </g>
+
+  <!-- overhead light falloff -->
+  <path d="M0 0h640v430H0z" fill="url(#sky)" opacity=".06"/>
+</svg>

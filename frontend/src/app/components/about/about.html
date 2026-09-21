@@ -1,0 +1,71 @@
+<section class="about section" id="about">
+  <div class="container about__grid">
+    <div class="about__copy">
+      <p class="eyebrow">About Us</p>
+      <h2 class="about__title">About RD Enterprises</h2>
+      <p class="about__text">
+        At RD Enterprises, we are committed to providing high-quality disposable and packaging products to
+        meet the needs of modern businesses. With a focus on reliability, affordability and customer
+        satisfaction, we strive to be your trusted supply partner.
+      </p>
+      <a class="btn btn--primary about__cta" href="#products">
+        Learn More
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 12h15M13 6l6 6-6 6" />
+        </svg>
+      </a>
+    </div>
+
+    <div class="about__media">
+      <img
+        class="about__image"
+        src="images/warehouse.svg"
+        alt="RD Enterprises warehouse stacked with wrapped pallets of stock"
+        width="640"
+        height="430"
+        loading="lazy"
+      />
+
+      <ul class="highlights">
+        @for (item of highlights; track item.icon) {
+          <li class="highlights__item">
+            <span class="highlights__icon" aria-hidden="true">
+              @switch (item.icon) {
+                @case ('quality') {
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green)"
+                       stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3l7 3v5.5c0 4.2-2.9 7.6-7 8.5-4.1-.9-7-4.3-7-8.5V6z" />
+                    <path d="m9 11.7 2.1 2.1L15.4 9.5" />
+                  </svg>
+                }
+                @case ('price') {
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green)"
+                       stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="8.5" />
+                    <path d="M9.5 8h5M9.5 10.6h5M13 8c1.4 0 2 .9 2 1.6 0 1.4-1.4 2-3 2l3.2 4.4" />
+                  </svg>
+                }
+                @case ('delivery') {
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green)"
+                       stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M2 6.5h11v9H2zM13 9.5h4.2l2.8 3.2v2.8h-7z" />
+                    <circle cx="6.5" cy="17.5" r="1.8" /><circle cx="16.5" cy="17.5" r="1.8" />
+                  </svg>
+                }
+                @default {
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green)"
+                       stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="8.5" r="3" /><circle cx="16.5" cy="9.5" r="2.3" />
+                    <path d="M3.5 18c0-3 2.5-4.8 5.5-4.8s5.5 1.8 5.5 4.8M16 13.6c2.7.2 4.5 1.9 4.5 4.4" />
+                  </svg>
+                }
+              }
+            </span>
+            <span class="highlights__label">{{ item.label }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</section>

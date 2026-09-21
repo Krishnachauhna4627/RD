@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 196 86" role="img" aria-label="RD Enterprises">
+  <!-- swoosh with arrow head -->
+  <path d="M20 28C46 7 108 2 150 14" fill="none" stroke="#0e5c3c" stroke-width="8" stroke-linecap="round"/>
+  <path d="M141 2l25 11-23 12z" fill="#0e5c3c"/>
+  <!-- monogram -->
+  <text x="26" y="62" font-family="Poppins, Segoe UI, sans-serif" font-size="52" font-weight="700"
+        fill="#0d1b21" letter-spacing="-1.5">RD</text>
+  <!-- wordmark -->
+  <text x="4" y="82" font-family="Poppins, Segoe UI, sans-serif" font-size="17" font-weight="600"
+        fill="#0d1b21" letter-spacing="4">ENTERPRISES</text>
+</svg>

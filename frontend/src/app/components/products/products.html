@@ -1,0 +1,46 @@
+<section class="products section" id="products">
+  <div class="container">
+    <div class="products__head">
+      <div>
+        <p class="eyebrow">Our Products</p>
+        <h2 class="products__title">Popular Products</h2>
+      </div>
+      <a class="link-arrow" href="#products">
+        View All Products
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 12h15M13 6l6 6-6 6" />
+        </svg>
+      </a>
+    </div>
+
+    <ul class="grid">
+      @for (product of products; track product.name) {
+        <li class="card">
+          <div class="card__media">
+            <picture>
+              <source type="image/webp" [srcset]="product.image + '.webp'" />
+              <img
+                [src]="product.image + '.jpg'"
+                [alt]="product.alt"
+                width="528"
+                height="396"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+          </div>
+          <h3 class="card__name">{{ product.name }}</h3>
+          <p class="card__blurb">{{ product.blurb }}</p>
+          <a class="link-arrow card__link" href="#contact">
+            View Details
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 12h15M13 6l6 6-6 6" />
+            </svg>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</section>

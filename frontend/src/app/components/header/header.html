@@ -1,0 +1,57 @@
+<header class="site-header" [class.is-scrolled]="scrolled()">
+  <div class="container bar">
+    <a class="brand" href="#home" (click)="select('#home')">
+      <img src="images/logo.svg" alt="RD Enterprises" width="110" height="48" />
+    </a>
+
+    <nav class="nav" [class.is-open]="menuOpen()" aria-label="Primary">
+      @for (link of links; track link.href) {
+        <a
+          class="nav__link"
+          [class.is-active]="active() === link.href"
+          [href]="link.href"
+          (click)="select(link.href)"
+          >{{ link.label }}</a
+        >
+      }
+      <a class="btn btn--primary nav__cta" href="#contact" (click)="select('#contact')">Get a Quote</a>
+    </nav>
+
+    <div class="actions">
+      <button class="icon-btn" type="button" aria-label="Search products">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-3.5-3.5" />
+        </svg>
+      </button>
+
+      <a class="btn btn--primary actions__cta" href="#contact">Get a Quote</a>
+
+      <button
+        class="icon-btn burger"
+        type="button"
+        [attr.aria-expanded]="menuOpen()"
+        aria-controls="primary-nav"
+        [attr.aria-label]="menuOpen() ? 'Close menu' : 'Open menu'"
+        (click)="toggleMenu()"
+      >
+        @if (menuOpen()) {
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        } @else {
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" aria-hidden="true">
+            <path d="M3 6h18M3 12h18M3 18h18" />
+          </svg>
+        }
+      </button>
+    </div>
+  </div>
+</header>
+
+@if (menuOpen()) {
+  <button class="scrim" type="button" tabindex="-1" aria-hidden="true" (click)="toggleMenu()"></button>
+}

@@ -1,0 +1,45 @@
+<section class="stats">
+  <div class="container stats__grid">
+    @for (stat of stats; track stat.label) {
+      <div class="stat">
+        <span class="stat__icon" aria-hidden="true">
+          @switch (stat.icon) {
+            @case ('building') {
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 21V4.5A1.5 1.5 0 0 1 5.5 3h8A1.5 1.5 0 0 1 15 4.5V21M15 10h3.5A1.5 1.5 0 0 1 20 11.5V21M2.5 21h19" />
+                <path d="M7 7h2M11 7h1M7 11h2M11 11h1M7 15h2M11 15h1M17 14h1M17 17.5h1" />
+              </svg>
+            }
+            @case ('people') {
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="7.5" r="3" /><circle cx="5" cy="9" r="2.3" /><circle cx="19" cy="9" r="2.3" />
+                <path d="M6.5 18.5c0-3 2.5-5 5.5-5s5.5 2 5.5 5M1.5 17.5c0-2.3 1.6-3.8 3.5-3.8M22.5 17.5c0-2.3-1.6-3.8-3.5-3.8" />
+              </svg>
+            }
+            @case ('trophy') {
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 4h10v5a5 5 0 0 1-10 0z" />
+                <path d="M7 5.5H4.5V7A3.5 3.5 0 0 0 8 10.5M17 5.5h2.5V7A3.5 3.5 0 0 1 16 10.5" />
+                <path d="M12 14v3.5M8.5 20.5h7l-.8-3h-5.4z" />
+              </svg>
+            }
+            @default {
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21.5s7-6.1 7-11.1A7 7 0 0 0 5 10.4c0 5 7 11.1 7 11.1Z" />
+                <circle cx="12" cy="10" r="2.6" />
+              </svg>
+            }
+          }
+        </span>
+        <div class="stat__body">
+          <p class="stat__value">{{ stat.value }}</p>
+          <p class="stat__label">{{ stat.label }}</p>
+        </div>
+      </div>
+    }
+  </div>
+</section>

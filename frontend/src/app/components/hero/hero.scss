@@ -1,0 +1,160 @@
+.hero {
+  position: relative;
+  overflow-x: clip;
+  background: var(--surface-warm);
+}
+
+.hero__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  align-items: center;
+  gap: clamp(24px, 4vw, 56px);
+  /* No padding here: the photo runs the full height of the band. */
+  padding-block: 0;
+}
+
+/* ── Copy ──────────────────────────────────────────────────────── */
+.hero__copy {
+  position: relative;
+  z-index: 2;
+  padding-block: clamp(36px, 5vw, 60px);
+}
+
+.hero__eyebrow {
+  margin-bottom: 14px;
+  color: var(--body);
+  font-size: clamp(11px, 1.1vw, 12px);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hero__title {
+  font-size: clamp(38px, 6vw, 62px);
+  letter-spacing: -0.035em;
+}
+
+.hero__subtitle {
+  margin-top: 10px;
+  color: var(--ink);
+  font-size: clamp(20px, 2.6vw, 27px);
+  font-weight: 500;
+  line-height: 1.32;
+  letter-spacing: -0.02em;
+}
+
+.hero__lede {
+  max-width: 44ch;
+  margin-top: 16px;
+  font-size: clamp(14px, 1.4vw, 15px);
+}
+
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 28px;
+}
+
+/* ── Trust badges ──────────────────────────────────────────────── */
+.hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(20px, 3.4vw, 42px);
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.badge svg { flex: none; }
+
+/* ── Media ─────────────────────────────────────────────────────── */
+.hero__media {
+  position: relative;
+  display: flex;
+  /* Fills the band even when the copy column is the taller of the two. */
+  align-self: stretch;
+  /* Bleed to the viewport edge on wide screens, matching the design. */
+  margin-right: calc(-1 * max(0px, (100vw - var(--container)) / 2) - 24px);
+}
+
+.hero__media picture {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.hero__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Anchored top-right: any crop eats the faded left edge and the bare table,
+     never the "Small Choices Big Impact" mark or the products. */
+  object-position: right top;
+  /* Softens the straight cut where the photo meets the section background. */
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 9%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 9%);
+}
+
+/* ── Responsive ────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .hero__grid { gap: 20px; }
+  .hero__badges { gap: 20px; }
+}
+
+@media (max-width: 860px) {
+  .hero__grid {
+    grid-template-columns: 1fr;
+    padding-block: 40px 0;
+    text-align: center;
+  }
+
+  .hero__lede { margin-inline: auto; }
+
+  .hero__actions,
+  .hero__badges { justify-content: center; }
+
+  .hero__badges { margin-bottom: 8px; }
+
+  .hero__media {
+    display: block;
+    margin-right: calc(-1 * max(0px, (100vw - var(--container)) / 2) - 24px);
+    margin-left: -24px;
+  }
+
+  .hero__image {
+    height: auto;
+    object-fit: fill;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .hero__subtitle br { display: none; }
+
+  .badge {
+    flex-direction: column;
+    gap: 6px;
+    width: calc(33.333% - 14px);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .hero__actions .btn { flex: 1 1 auto; justify-content: center; }
+}
+
+@media (max-width: 380px) {
+  .hero__badges { gap: 14px; }
+  .badge { width: calc(50% - 7px); }
+}
