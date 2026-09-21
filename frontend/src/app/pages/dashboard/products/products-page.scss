@@ -9,13 +9,150 @@
   font-size: 14px;
 }
 
-.table__caption {
-  padding: 14px 18px;
+/* ── Toolbar above the table ───────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 18px 12px;
+}
+
+.toolbar__filters,
+.toolbar__view {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.toolbar__count {
+  padding: 0 18px 12px;
   border-bottom: 1px solid var(--line);
   color: var(--body);
   font-size: 13px;
-  text-align: left;
 }
+
+/* ── Filter dropdowns ──────────────────────────────────────────── */
+.filter {
+  display: grid;
+  gap: 5px;
+}
+
+.filter__label {
+  color: var(--body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.filter__select {
+  appearance: none;
+  min-width: 165px;
+  padding: 8px 32px 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background-color: var(--surface);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5l5-5' stroke='%235b6b72' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 11px center;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+
+  &:hover { border-color: var(--green); }
+
+  &:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px var(--green-soft);
+  }
+}
+
+.toolbar__reset {
+  padding: 8px 15px;
+  font-size: 13px;
+
+  &[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    border-color: var(--line);
+    color: var(--body);
+  }
+}
+
+.groupby {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-alt);
+}
+
+.groupby__label {
+  padding-inline: 8px 4px;
+  color: var(--body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.groupby__btn {
+  padding: 6px 13px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--body);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.16s ease, color 0.16s ease;
+
+  &:hover { color: var(--green); }
+
+  &.is-active {
+    background: var(--surface);
+    color: var(--green);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* ── Group heading row ─────────────────────────────────────────── */
+.grouprow__cell {
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--line);
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.grouprow__count {
+  display: inline-block;
+  min-width: 20px;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--green);
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0;
+  text-align: center;
+}
+
+/* Each group is its own tbody, so the first heading needs no extra rule
+   while later ones get a little breathing room above. */
+.table tbody + tbody .grouprow__cell { border-top: 1px solid var(--line); }
+
+.table__name.is-indented { padding-left: 30px; }
 
 .table th {
   padding: 0;

@@ -58,10 +58,87 @@
   </div>
 } @else {
   <div class="panel panel--table">
+    <div class="toolbar">
+      <div class="toolbar__filters">
+        <label class="filter">
+          <span class="filter__label">Category</span>
+          <select
+            class="filter__select"
+            [ngModel]="filterCategory()"
+            (ngModelChange)="filterCategory.set($event)"
+          >
+            <option value="">All categories</option>
+            @for (option of categoryOptions(); track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="filter">
+          <span class="filter__label">Material</span>
+          <select
+            class="filter__select"
+            [ngModel]="filterMaterial()"
+            (ngModelChange)="filterMaterial.set($event)"
+          >
+            <option value="">All materials</option>
+            @for (option of materialOptions(); track option) {
+              <option [value]="option">{{ option }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <div class="toolbar__view">
+        <div class="groupby" role="group" aria-label="Group products by">
+          <span class="groupby__label">Group by</span>
+          @for (option of groupOptions; track option.value) {
+            <button
+              class="groupby__btn"
+              type="button"
+              [class.is-active]="groupBy() === option.value"
+              [attr.aria-pressed]="groupBy() === option.value"
+              (click)="setGroupBy(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+
+        <button
+          class="btn btn--ghost toolbar__reset"
+          type="button"
+          [disabled]="!viewChanged()"
+          (click)="resetView()"
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5" />
+          </svg>
+          Reset
+        </button>
+      </div>
+    </div>
+
+    <p class="toolbar__count">
+      @if (filtersActive()) {
+        Showing {{ shown() }} of {{ total() }} products.
+      } @else {
+        {{ total() }} product{{ total() === 1 ? '' : 's' }}.
+      }
+      Click a column heading to sort.
+    </p>
+
+    @if (shown() === 0) {
+      <div class="empty">
+        <p class="empty__title">No products match these filters</p>
+        <p class="empty__text">Nothing is both {{ filterCategory() || 'any category' }} and
+          {{ filterMaterial() || 'any material' }}.</p>
+        <button class="btn btn--ghost" type="button" (click)="clearFilters()">Clear filters</button>
+      </div>
+    } @else {
     <table class="table">
-      <caption class="table__caption">
-        {{ total() }} product{{ total() === 1 ? '' : 's' }}. Click a column heading to sort.
-      </caption>
+
       <thead>
         <tr>
           <th scope="col" [attr.aria-sort]="ariaSort('name')">
@@ -90,16 +167,28 @@
           </th>
         </tr>
       </thead>
-      <tbody>
-        @for (product of sorted(); track product.id) {
-          <tr>
-            <td class="table__name">{{ product.name }}</td>
-            <td>{{ product.category }}</td>
-            <td><span class="tag">{{ product.material_type }}</span></td>
-          </tr>
-        }
-      </tbody>
+      @for (group of groups(); track group.key) {
+        <tbody>
+          @if (group.key !== null) {
+            <tr class="grouprow">
+              <th class="grouprow__cell" scope="colgroup" colspan="3">
+                {{ group.key }}
+                <span class="grouprow__count">{{ group.rows.length }}</span>
+              </th>
+            </tr>
+          }
+
+          @for (product of group.rows; track product.id) {
+            <tr>
+              <td class="table__name" [class.is-indented]="isGrouped()">{{ product.name }}</td>
+              <td>{{ product.category }}</td>
+              <td><span class="tag">{{ product.material_type }}</span></td>
+            </tr>
+          }
+        </tbody>
+      }
     </table>
+    }
   </div>
 }
 
