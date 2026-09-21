@@ -146,7 +146,9 @@ button { font: inherit; cursor: pointer; }
 }
 
 /* ── Dashboard page furniture ──────────────────────────────────── */
-/* Global rather than per-component, since every dashboard page uses them. */
+/* Global rather than per-component, since every dashboard page uses them.
+   Named .kpi* rather than .stat*: the landing page's stats band already owns
+   .stat/.stat__value/.stat__label, and a global rule here would paint over it. */
 .page-head {
   display: flex;
   align-items: flex-end;
@@ -202,28 +204,28 @@ button { font: inherit; cursor: pointer; }
   font-size: 14px;
 }
 
-.stat-row {
+.kpi-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
 
-.stat {
+.kpi {
   padding: 16px 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
 }
 
-.stat__label {
+.kpi__label {
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.stat__value {
+.kpi__value {
   margin-top: 4px;
   color: var(--ink);
   font-size: 24px;

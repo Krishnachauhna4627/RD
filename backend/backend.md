@@ -187,6 +187,19 @@ SQL, **db/pool.ts** owns the connection. Routes do not write SQL.
 | `created_at` | TIMESTAMP | set on insert |
 | `updated_at` | TIMESTAMP | updated automatically |
 
+### `products`
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | INT UNSIGNED | PK, auto-increment |
+| `name` | VARCHAR(160) | |
+| `category` | VARCHAR(80) | free text, indexed |
+| `material_type` | VARCHAR(48) | one of the fixed list, indexed |
+| `created_at` / `updated_at` | TIMESTAMP | |
+
+Unique on **(`name`, `material_type`)** rather than name alone, so a paper cup and a
+plastic cup of the same name can both exist.
+
 ### Adding a migration
 
 Drop a new file in `sql/` with the next number prefix (`002_create_products.sql`) and
@@ -228,6 +241,47 @@ The 401 is deliberately identical whether the username does not exist, the passw
 is wrong, or the account is deactivated. Distinguishing them would let anyone test
 which usernames are real. For the same reason a bcrypt comparison is run even when
 the user does not exist, so an unknown username does not answer measurably faster.
+
+### `GET /api/products`
+
+Requires `Authorization: Bearer <token>`. Returns the whole catalogue, sorted by name.
+
+```json
+{ "products": [
+  { "id": 1, "name": "Kraft Food Box 750ml", "category": "Food Containers",
+    "material_type": "Paper", "created_at": "...", "updated_at": "..." }
+] }
+```
+
+### `POST /api/products`
+
+Requires a token.
+
+```json
+{ "name": "Kraft Food Box 750ml", "category": "Food Containers", "materialType": "Paper" }
+```
+
+**201** `{ "product": { ... } }`
+**400** — missing field, or a `materialType` not on the list
+**409** — that name already exists in that material
+**401** — no or bad token
+
+`materialType` must be one of: `Thermocol`, `Plastic`, `Paper`, `Bagasse`, `Aluminium`,
+`Wood`, `Cornstarch`, `Other`. The list lives in `src/services/products.ts` and is
+mirrored in `frontend/src/app/core/products/product.models.ts` — **change both**, or
+the dropdown will offer a value the API rejects.
+
+`category` is free text with suggestions in the UI, so new ranges do not need a
+code change.
+
+### `GET /api/products/materials`
+
+The allowed material list, for building a dropdown without hardcoding it.
+
+### `DELETE /api/products/:id`
+
+Requires a token. **204** on success, **404** if it does not exist.
+*No UI calls this yet — the dashboard table is currently read-and-add only.*
 
 ### `GET /api/auth/me`
 

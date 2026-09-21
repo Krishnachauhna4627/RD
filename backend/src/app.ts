@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { env } from './config/env.js';
 import { authRouter } from './routes/auth.js';
+import { productsRouter } from './routes/products.js';
 import { errorHandler, notFound } from './middleware/error.js';
 import { pool } from './db/pool.js';
 
@@ -28,6 +29,7 @@ export function createApp() {
   });
 
   app.use('/api/auth', authRouter);
+  app.use('/api/products', productsRouter);
 
   app.use(notFound);
   app.use(errorHandler);
