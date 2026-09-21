@@ -37,6 +37,8 @@ cd backend
 npm install
 
 # 2. Create the database and the app's MySQL user (needs root — once only)
+#    SKIP THIS if you already have a MySQL user and the rd_collections database;
+#    just put your own credentials in .env instead.
 sudo mysql < setup-database.sql
 
 # 3. Create the tables
@@ -71,7 +73,7 @@ password. `.env.example` is the committed template; add every new key to both.
 | `DB_HOST` | `localhost` | MySQL host |
 | `DB_PORT` | `3306` | MySQL port |
 | `DB_NAME` | `rd_collections` | Database name |
-| `DB_USER` | `rd_app` | MySQL user the API connects as |
+| `DB_USER` | `rd_app` | MySQL user the API connects as (currently `nav` locally) |
 | `DB_PASSWORD` | *(generated)* | That user's password |
 | `JWT_SECRET` | *(generated)* | Signs login tokens — changing it logs everyone out |
 | `JWT_EXPIRES_IN` | `24h` | Token lifetime |
@@ -272,6 +274,17 @@ Step 2 of setup has not been run.
 
 **`ECONNREFUSED 127.0.0.1:3306`**
 MySQL is not running: `sudo systemctl start mysql`.
+
+**`connect ETIMEDOUT` (hangs, rather than refusing straight away)**
+`DB_PORT` points at something that is listening but is not MySQL — a timeout means
+something answered the TCP connection and then never spoke MySQL, whereas a wrong
+*closed* port refuses instantly. Confirm which port MySQL is really on:
+
+```bash
+ss -ltnp | grep -E '3306|mysql'
+```
+
+MySQL on this machine is on **3306** (33060 is its X protocol, not for this driver).
 
 **`Missing required environment variable ...`**
 That key is blank in `.env`. `.env.example` lists them all.

@@ -18,6 +18,15 @@ interface AppliedRow extends RowDataPacket {
   filename: string;
 }
 
+/** Drops whole-line -- and # comments, so a comment-only fragment is detectable. */
+function stripComments(sql: string): string {
+  return sql
+    .split('\n')
+    .filter((line) => !/^\s*(--|#)/.test(line))
+    .join('\n')
+    .trim();
+}
+
 async function ensureMigrationsTable(): Promise<void> {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
@@ -47,12 +56,13 @@ async function migrate(): Promise<void> {
     const sql = await readFile(resolve(SQL_DIR, filename), 'utf8');
 
     // multipleStatements is off on the pool, so split the file and run each
-    // statement on its own. Keeps a stray semicolon in a string from biting us
-    // by ignoring empty fragments.
+    // statement on its own. Comment-only lines are stripped first, then any
+    // fragment with nothing left in it is skipped — note the test is on the
+    // stripped copy while the original statement is what actually runs.
     const statements = sql
       .split(/;\s*$/m)
       .map((statement) => statement.trim())
-      .filter((statement) => statement.length > 0 && !/^(--|#)/.test(statement));
+      .filter((statement) => stripComments(statement).length > 0);
 
     for (const statement of statements) {
       await pool.query(statement);
