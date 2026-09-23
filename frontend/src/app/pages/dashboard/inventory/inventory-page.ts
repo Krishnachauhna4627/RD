@@ -35,9 +35,19 @@ export class InventoryPage {
 
   // Stock on hand filters. '' means "all".
   protected readonly stockSearch = signal('');
+  /** A product id, or null for every product. */
+  protected readonly stockProduct = signal<number | null>(null);
   protected readonly stockMaterial = signal('');
   protected readonly stockCategory = signal('');
   protected readonly stockStatus = signal<StockStatus>('');
+
+  /** One option per product that has stock rows, labelled like the rest of the app. */
+  protected readonly stockProducts = computed(() => {
+    const byId = new Map(this.stock().map((s) => [s.product_id, `${s.name} - ${s.material_type}`]));
+    return [...byId]
+      .map(([id, label]) => ({ id, label }))
+      .sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true, sensitivity: 'base' }));
+  });
 
   protected readonly stockMaterials = computed(() => [...new Set(this.stock().map((s) => s.material_type))].sort());
   protected readonly stockCategories = computed(() =>
@@ -51,8 +61,10 @@ export class InventoryPage {
     const material = this.stockMaterial();
     const category = this.stockCategory();
     const status = this.stockStatus();
+    const product = this.stockProduct();
 
     return this.stock().filter((s) => {
+      if (product !== null && s.product_id !== product) return false;
       if (material && s.material_type !== material) return false;
       if (category && s.category !== category) return false;
       if (status === 'in' && s.quantity <= 0) return false;
@@ -64,11 +76,14 @@ export class InventoryPage {
   });
 
   protected readonly stockFiltersActive = computed(
-    () => !!(this.stockSearch() || this.stockMaterial() || this.stockCategory() || this.stockStatus()),
+    () =>
+      !!(this.stockSearch() || this.stockMaterial() || this.stockCategory() || this.stockStatus()) ||
+      this.stockProduct() !== null,
   );
 
   protected clearStockFilters(): void {
     this.stockSearch.set('');
+    this.stockProduct.set(null);
     this.stockMaterial.set('');
     this.stockCategory.set('');
     this.stockStatus.set('');

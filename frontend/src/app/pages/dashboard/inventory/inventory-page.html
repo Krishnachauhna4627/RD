@@ -78,6 +78,13 @@
     <h2 class="section-title">Stock on hand</h2>
 
     <div class="stock-filters">
+      <select class="sf-control sf-select sf-product" aria-label="Product" [ngModel]="stockProduct()"
+              (ngModelChange)="stockProduct.set($event)">
+        <option [ngValue]="null">All products</option>
+        @for (option of stockProducts(); track option.id) {
+          <option [ngValue]="option.id">{{ option.label }}</option>
+        }
+      </select>
       <input
         class="sf-control sf-search"
         type="search"
