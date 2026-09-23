@@ -4,11 +4,13 @@ import { PurchasesService } from '../../../core/purchases/purchases.service';
 import { SalesService } from '../../../core/sales/sales.service';
 import { PurchaseDialog } from './purchase-dialog/purchase-dialog';
 import { SellDialog } from './sell-dialog/sell-dialog';
+import { Ledger, type LedgerRow } from './ledger/ledger';
 
 type OpenDialog = 'none' | 'purchase' | 'sell';
+type DetailTab = 'purchase' | 'sell';
 
 @Component({
-  imports: [PurchaseDialog, SellDialog, DecimalPipe, DatePipe],
+  imports: [PurchaseDialog, SellDialog, Ledger, DecimalPipe, DatePipe],
   selector: 'app-inventory-page',
   templateUrl: './inventory-page.html',
   styleUrl: './inventory-page.scss',
@@ -25,8 +27,46 @@ export class InventoryPage {
 
   protected readonly dialog = signal<OpenDialog>('none');
 
-  /** Expanded history rows, keyed "p<id>" for purchases and "s<id>" for sales. */
-  protected readonly expanded = signal<ReadonlySet<string>>(new Set());
+  /** Which detail list is showing under the stock table. */
+  protected readonly tab = signal<DetailTab>('purchase');
+
+  protected readonly purchaseRows = computed<LedgerRow[]>(() =>
+    this.purchases().flatMap((p) =>
+      p.items.map((i) => ({
+        key: i.id,
+        date: p.purchase_date,
+        billId: p.id,
+        customerName: null,
+        productName: i.product_name,
+        material: i.material_type,
+        category: i.category,
+        quantity: i.quantity,
+        unit: i.quantity_unit,
+        rate: i.unit_price,
+        total: i.line_total,
+        addedBy: p.created_by_username,
+      })),
+    ),
+  );
+
+  protected readonly saleRows = computed<LedgerRow[]>(() =>
+    this.sales().flatMap((s) =>
+      s.items.map((i) => ({
+        key: i.id,
+        date: s.sale_date,
+        billId: s.id,
+        customerName: s.customer_name,
+        productName: i.product_name,
+        material: i.material_type,
+        category: i.category,
+        quantity: i.quantity,
+        unit: i.quantity_unit,
+        rate: i.unit_price,
+        total: i.line_total,
+        addedBy: s.created_by_username,
+      })),
+    ),
+  );
 
   protected readonly hasActivity = computed(() => this.purchases().length > 0 || this.sales().length > 0);
 
@@ -42,18 +82,6 @@ export class InventoryPage {
 
   constructor() {
     this.reload();
-  }
-
-  protected isExpanded(key: string): boolean {
-    return this.expanded().has(key);
-  }
-
-  protected toggle(key: string): void {
-    this.expanded.update((current) => {
-      const next = new Set(current);
-      if (!next.delete(key)) next.add(key);
-      return next;
-    });
   }
 
   protected open(dialog: Exclude<OpenDialog, 'none'>): void {

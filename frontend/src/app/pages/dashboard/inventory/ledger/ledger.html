@@ -1,0 +1,130 @@
+<div class="filters">
+  <div class="filters__row">
+    <label class="filter">
+      <span class="filter__label">From</span>
+      <input class="control" type="date" [max]="to() || null" [ngModel]="from()" (ngModelChange)="from.set($event ?? '')" />
+    </label>
+    <label class="filter">
+      <span class="filter__label">To</span>
+      <input class="control" type="date" [min]="from() || null" [ngModel]="to()" (ngModelChange)="to.set($event ?? '')" />
+    </label>
+
+    <div class="presets" role="group" aria-label="Date shortcuts">
+      @for (preset of presets; track preset.value) {
+        <button
+          class="preset"
+          type="button"
+          [class.is-active]="activePreset() === preset.value"
+          [attr.aria-pressed]="activePreset() === preset.value"
+          (click)="applyPreset(preset.value)"
+        >
+          {{ preset.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="filters__row">
+    <label class="filter filter--grow">
+      <span class="filter__label">Product</span>
+      <input
+        class="control"
+        type="search"
+        placeholder="Search name, material, category…"
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+      />
+    </label>
+
+    <label class="filter">
+      <span class="filter__label">Material</span>
+      <select class="control control--select" [ngModel]="material()" (ngModelChange)="material.set($event)">
+        <option value="">All materials</option>
+        @for (option of materialOptions(); track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+    </label>
+
+    @if (withCustomer()) {
+      <label class="filter">
+        <span class="filter__label">Customer</span>
+        <select class="control control--select" [ngModel]="customer()" (ngModelChange)="customer.set($event)">
+          <option value="">All customers</option>
+          @for (option of customerOptions(); track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    <button class="btn btn--ghost reset" type="button" [disabled]="!filtersActive()" (click)="clearFilters()">
+      Clear filters
+    </button>
+  </div>
+</div>
+
+<p class="count">
+  @if (filtersActive()) {
+    {{ filtered().length }} of {{ rows().length }} lines
+  } @else {
+    {{ rows().length }} line{{ rows().length === 1 ? '' : 's' }}
+  }
+  from {{ billCount() }} {{ noun() }}{{ billCount() === 1 ? '' : 's' }}.
+</p>
+
+@if (rows().length === 0) {
+  <div class="empty">
+    <p class="empty__title">No {{ noun() }}s yet</p>
+    <p class="empty__text">Every {{ noun() }} you record will be listed here, line by line.</p>
+  </div>
+} @else if (filtered().length === 0) {
+  <div class="empty">
+    <p class="empty__title">Nothing matches these filters</p>
+    <button class="btn btn--ghost" type="button" (click)="clearFilters()">Clear filters</button>
+  </div>
+} @else {
+  <table class="table">
+    <thead>
+      <tr>
+        <th scope="col">Date</th>
+        @if (withCustomer()) {
+          <th scope="col">Customer</th>
+        }
+        <th scope="col">Product</th>
+        <th scope="col">Material</th>
+        <th scope="col">Category</th>
+        <th scope="col" class="num">Quantity</th>
+        <th scope="col" class="num">Rate</th>
+        <th scope="col" class="num">Total</th>
+        <th scope="col">Added by</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of filtered(); track row.key; let i = $index) {
+        <tr [class.is-continued]="continuesBill(i)">
+          <td class="date">{{ row.date | date: 'd MMM y' }}</td>
+          @if (withCustomer()) {
+            <td class="name">{{ row.customerName }}</td>
+          }
+          <td class="name">{{ row.productName }}</td>
+          <td><span class="tag">{{ row.material }}</span></td>
+          <td>{{ row.category }}</td>
+          <td class="num">{{ row.quantity | number: '1.0-3' }} {{ row.unit }}</td>
+          <td class="num">₹{{ row.rate | number: '1.2-2' }}</td>
+          <td class="num strong">₹{{ row.total | number: '1.2-2' }}</td>
+          <td>{{ row.addedBy ?? '—' }}</td>
+        </tr>
+      }
+    </tbody>
+    <tfoot>
+      <tr>
+        <td [attr.colspan]="withCustomer() ? 7 : 6" class="foot__label">
+          {{ filtersActive() ? 'Total for these filters' : 'Total' }}
+        </td>
+        <td class="num foot__value">₹{{ filteredTotal() | number: '1.2-2' }}</td>
+        <td></td>
+      </tr>
+    </tfoot>
+  </table>
+}

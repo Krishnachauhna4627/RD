@@ -1,0 +1,167 @@
+:host { display: block; }
+
+/* ── Filters ───────────────────────────────────────────────────── */
+.filters {
+  display: grid;
+  gap: 10px;
+  padding: 14px 18px 12px;
+}
+
+.filters__row {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter { display: grid; gap: 5px; }
+.filter--grow { flex: 1 1 220px; }
+
+.filter__label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.control {
+  min-width: 150px;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background-color: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+
+  &:hover { border-color: var(--green); }
+
+  &:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px var(--green-soft);
+  }
+}
+
+.control--select {
+  appearance: none;
+  padding-right: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5l5-5' stroke='%235b6b72' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-alt);
+}
+
+.preset {
+  padding: 5px 11px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--body);
+  font-size: 12px;
+  font-weight: 500;
+
+  &:hover { color: var(--green); }
+
+  &.is-active {
+    background: var(--surface);
+    color: var(--green);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.reset {
+  padding: 7px 14px;
+  font-size: 13px;
+
+  &[disabled] { opacity: 0.45; cursor: not-allowed; }
+}
+
+.count {
+  padding: 0 18px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+/* ── Table ─────────────────────────────────────────────────────── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-alt);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  tbody tr:hover { background: #fafcfb; }
+
+  /* Lines of the same bill sit closer together under one date. */
+  tr.is-continued td { border-top-color: transparent; }
+  tr.is-continued .date { color: transparent; }
+  tbody tr:has(+ tr.is-continued) td { border-bottom-style: dashed; }
+
+  tfoot td {
+    border-bottom: 0;
+    background: var(--surface-alt);
+  }
+
+  .num {
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+
+.date,
+.name {
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.strong { color: var(--ink); font-weight: 600; }
+
+.tag {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.foot__label {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+
+.foot__value {
+  color: var(--green-dark);
+  font-size: 15px;
+  font-weight: 700;
+}

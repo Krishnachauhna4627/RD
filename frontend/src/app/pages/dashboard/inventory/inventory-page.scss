@@ -41,12 +41,17 @@
   }
 
   > tbody:last-child > tr:last-child > td { border-bottom: 0; }
-  > tbody > tr:not(.detail-row):hover { background: #fafcfb; }
+  > tbody > tr:hover { background: #fafcfb; }
 }
 
 .table .num,
 .items .num {
   text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.qty {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -64,13 +69,6 @@
   &.is-negative { color: #b3261e; }
 }
 
-.summary {
-  max-width: 340px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .tag {
   display: inline-block;
   padding: 3px 10px;
@@ -81,63 +79,45 @@
   font-weight: 500;
 }
 
-/* ── Expandable purchase rows ──────────────────────────────────── */
-.toggle-cell { width: 52px; }
+/* ── Detail tabs ───────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--line);
+}
 
-.toggle {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -1px;
+  padding: 14px 12px 12px;
   border: 0;
-  border-radius: 50%;
+  border-bottom: 2px solid transparent;
   background: transparent;
   color: var(--body);
+  font-size: 14px;
+  font-weight: 600;
 
-  svg { transition: transform 0.18s ease; }
-  &:hover { background: var(--green-soft); color: var(--green); }
-}
+  &:hover { color: var(--green); }
 
-.purchase-row.is-open .toggle svg { transform: rotate(180deg); }
-
-.table > tbody > tr.detail-row > td {
-  padding: 0 18px 14px;
-  background: var(--surface-alt);
-}
-
-.purchase-row.is-open > td {
-  background: var(--surface-alt);
-  border-bottom-color: transparent;
-}
-
-.items {
-  width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  border-collapse: separate;
-  border-spacing: 0;
-  background: var(--surface);
-  font-size: 13px;
-
-  th {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--line);
-    color: var(--body);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-align: left;
-    text-transform: uppercase;
+  &.is-active {
+    border-bottom-color: var(--green);
+    color: var(--green);
   }
+}
 
-  td {
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--line);
-    color: var(--ink);
-  }
+.tab__count {
+  min-width: 22px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-alt);
+  color: var(--body);
+  font-size: 11px;
+  text-align: center;
 
-  tbody tr:last-child td { border-bottom: 0; }
+  .tab.is-active & { background: var(--green); color: #fff; }
 }
 
 @media (max-width: 620px) {
