@@ -1,7 +1,7 @@
 import { Component, HostListener, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProductsService } from '../../../../core/products/products.service';
-import { MATERIAL_TYPES, PRODUCT_CATEGORIES } from '../../../../core/products/product.models';
+import { MATERIAL_TYPES, PRODUCT_CATEGORIES, QUANTITY_UNITS } from '../../../../core/products/product.models';
 
 @Component({
   imports: [FormsModule],
@@ -17,10 +17,12 @@ export class ProductDialog {
 
   protected readonly materials = MATERIAL_TYPES;
   protected readonly categories = PRODUCT_CATEGORIES;
+  protected readonly units = QUANTITY_UNITS;
 
   protected readonly name = signal('');
   protected readonly category = signal('');
   protected readonly material = signal('');
+  protected readonly unit = signal<string>('Piece');
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
 
@@ -36,16 +38,17 @@ export class ProductDialog {
     const name = this.name().trim();
     const category = this.category().trim();
     const materialType = this.material();
+    const quantityUnit = this.unit();
 
-    if (!name || !category || !materialType) {
-      this.error.set('Fill in the product name, category and material type.');
+    if (!name || !category || !materialType || !quantityUnit) {
+      this.error.set('Fill in the product name, category, material type and quantity unit.');
       return;
     }
 
     this.saving.set(true);
     this.error.set(null);
 
-    this.products.create({ name, category, materialType }).subscribe({
+    this.products.create({ name, category, materialType, quantityUnit }).subscribe({
       next: () => {
         this.saving.set(false);
         this.created.emit();

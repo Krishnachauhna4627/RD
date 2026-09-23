@@ -165,13 +165,21 @@
               </span>
             </button>
           </th>
+          <th scope="col" [attr.aria-sort]="ariaSort('quantity_unit')">
+            <button class="th-sort" type="button" (click)="sortBy('quantity_unit')">
+              Unit
+              <span class="th-sort__icon" [class.is-active]="sortKey() === 'quantity_unit'">
+                @if (sortKey() === 'quantity_unit' && sortDirection() === 'desc') { ↓ } @else { ↑ }
+              </span>
+            </button>
+          </th>
         </tr>
       </thead>
       @for (group of groups(); track group.key) {
         <tbody>
           @if (group.key !== null) {
             <tr class="grouprow">
-              <th class="grouprow__cell" scope="colgroup" colspan="3">
+              <th class="grouprow__cell" scope="colgroup" colspan="4">
                 {{ group.key }}
                 <span class="grouprow__count">{{ group.rows.length }}</span>
               </th>
@@ -183,6 +191,7 @@
               <td class="table__name" [class.is-indented]="isGrouped()">{{ product.name }}</td>
               <td>{{ product.category }}</td>
               <td><span class="tag">{{ product.material_type }}</span></td>
+              <td>{{ product.quantity_unit }}</td>
             </tr>
           }
         </tbody>

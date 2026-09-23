@@ -3,32 +3,213 @@
     <h1 class="page-head__title">Customers</h1>
     <p class="page-head__sub">Businesses that order from RD Enterprises.</p>
   </div>
+
+  <button class="btn btn--primary" type="button" (click)="openDialog()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+    Add customer
+  </button>
 </div>
 
 <div class="kpi-row">
   <div class="kpi">
     <p class="kpi__label">Customers</p>
-    <p class="kpi__value">0</p>
+    <p class="kpi__value">{{ total() }}</p>
   </div>
   <div class="kpi">
-    <p class="kpi__label">Active this month</p>
-    <p class="kpi__value">0</p>
+    <p class="kpi__label">Active</p>
+    <p class="kpi__value">{{ activeCount() }}</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi__label">Regular</p>
+    <p class="kpi__value">{{ regularCount() }}</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi__label">Cities</p>
+    <p class="kpi__value">{{ cityCount() }}</p>
   </div>
   <div class="kpi">
     <p class="kpi__label">New this week</p>
-    <p class="kpi__value">0</p>
+    <p class="kpi__value">{{ newThisWeek() }}</p>
   </div>
 </div>
 
-<div class="panel">
-  <div class="empty">
-    <span class="empty__icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M16 20v-2a4 4 0 0 0-8 0v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-      </svg>
-    </span>
-    <p class="empty__title">No customers yet</p>
-    <p class="empty__text">Customer records and their order history will be listed here.</p>
+@if (error()) {
+  <div class="panel">
+    <div class="empty">
+      <p class="empty__title">Could not load customers</p>
+      <p class="empty__text">{{ error() }}</p>
+      <button class="btn btn--ghost" type="button" (click)="reload()">Try again</button>
+    </div>
   </div>
-</div>
+} @else if (loading() && total() === 0) {
+  <div class="panel">
+    <div class="empty">
+      <p class="empty__text">Loading customers…</p>
+    </div>
+  </div>
+} @else if (total() === 0) {
+  <div class="panel">
+    <div class="empty">
+      <span class="empty__icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M16 20v-2a4 4 0 0 0-8 0v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+        </svg>
+      </span>
+      <p class="empty__title">No customers yet</p>
+      <p class="empty__text">Add your first customer and they will show up in this list.</p>
+      <button class="btn btn--primary" type="button" (click)="openDialog()">Add customer</button>
+    </div>
+  </div>
+} @else {
+  <div class="panel panel--table">
+    <div class="toolbar">
+      <label class="search">
+        <span class="visually-hidden">Search customers</span>
+        <svg class="search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+        </svg>
+        <input
+          class="search__input"
+          type="search"
+          placeholder="Search name, phone, email, GSTIN…"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </label>
+
+      <label class="filter">
+        <span class="visually-hidden">Status</span>
+        <select class="filter__select" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+          <option value="">Active and inactive</option>
+          <option value="active">Active only</option>
+          <option value="inactive">Inactive only</option>
+        </select>
+      </label>
+
+      <label class="filter">
+        <span class="visually-hidden">Customer type</span>
+        <select class="filter__select" [ngModel]="filterType()" (ngModelChange)="filterType.set($event)">
+          <option value="">Regular and not</option>
+          <option value="regular">Regular only</option>
+          <option value="not-regular">Not regular only</option>
+        </select>
+      </label>
+
+      <label class="filter">
+        <span class="visually-hidden">City</span>
+        <select class="filter__select" [ngModel]="filterCity()" (ngModelChange)="filterCity.set($event)">
+          <option value="">All cities</option>
+          @for (city of cityOptions(); track city) {
+            <option [value]="city">{{ city }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <p class="toolbar__count">
+      @if (filtersActive()) {
+        Showing {{ shown() }} of {{ total() }} customers.
+      } @else {
+        {{ total() }} customer{{ total() === 1 ? '' : 's' }}.
+      }
+    </p>
+
+    @if (statusError()) {
+      <p class="status-error" role="alert">{{ statusError() }}</p>
+    }
+
+    @if (shown() === 0) {
+      <div class="empty">
+        <p class="empty__title">No customers match</p>
+        <p class="empty__text">Try a different search, or clear the filters.</p>
+        <button class="btn btn--ghost" type="button" (click)="clearFilters()">Clear filters</button>
+      </div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Customer</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Email</th>
+            <th scope="col">City</th>
+            <th scope="col">GSTIN</th>
+            <th scope="col">Added</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (customer of filtered(); track customer.id) {
+            <tr [class.is-inactive]="!customer.is_active">
+              <td>
+                <p class="table__name">
+                  {{ customer.customer_name }}
+                  @if (customer.is_regular) {
+                    <span class="badge">Regular</span>
+                  }
+                  @if (!customer.is_active) {
+                    <span class="badge badge--inactive">Inactive</span>
+                  }
+                </p>
+                @if (customer.contact_person || customer.address) {
+                  <p class="table__sub">
+                    {{ customer.contact_person }}
+                    @if (customer.contact_person && customer.address) { · }
+                    {{ customer.address }}
+                  </p>
+                }
+              </td>
+              <td class="nowrap"><a class="link" [href]="'tel:' + customer.phone">{{ formatPhone(customer.phone) }}</a></td>
+              <td>
+                @if (customer.email) {
+                  <a class="link" [href]="'mailto:' + customer.email">{{ customer.email }}</a>
+                } @else { <span class="muted">—</span> }
+              </td>
+              <td>{{ customer.city ?? '—' }}</td>
+              <td class="mono">{{ customer.gstin ?? '—' }}</td>
+              <td class="nowrap">{{ customer.created_at.replace(' ', 'T') | date: 'd MMM y' }}</td>
+              <td class="actions">
+                <button
+                  class="edit-btn"
+                  type="button"
+                  [attr.aria-label]="'Edit ' + customer.customer_name"
+                  (click)="editCustomer(customer)"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                  </svg>
+                  Edit
+                </button>
+                <button
+                  class="edit-btn"
+                  type="button"
+                  [class.edit-btn--danger]="customer.is_active"
+                  [disabled]="statusPending().has(customer.id)"
+                  [attr.aria-label]="(customer.is_active ? 'Deactivate ' : 'Activate ') + customer.customer_name"
+                  (click)="toggleActive(customer)"
+                >
+                  @if (statusPending().has(customer.id)) {
+                    Saving…
+                  } @else if (customer.is_active) {
+                    Deactivate
+                  } @else {
+                    Activate
+                  }
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}
+
+@if (dialogOpen()) {
+  <app-customer-dialog [customer]="editingCustomer()" (closed)="closeDialog()" />
+}

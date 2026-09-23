@@ -1,34 +1,163 @@
 <div class="page-head">
   <div>
     <h1 class="page-head__title">Inventory</h1>
-    <p class="page-head__sub">Stock on hand and what needs reordering.</p>
+    <p class="page-head__sub">Stock on hand, built up from the purchases you record.</p>
   </div>
+
+  <button class="btn btn--primary" type="button" (click)="openDialog()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+    Purchase
+  </button>
 </div>
 
 <div class="kpi-row">
   <div class="kpi">
-    <p class="kpi__label">Total units</p>
-    <p class="kpi__value">0</p>
+    <p class="kpi__label">Products in stock</p>
+    <p class="kpi__value">{{ productsInStock() }}</p>
   </div>
   <div class="kpi">
-    <p class="kpi__label">Low stock</p>
-    <p class="kpi__value">0</p>
+    <p class="kpi__label">Purchases</p>
+    <p class="kpi__value">{{ purchases().length }}</p>
   </div>
   <div class="kpi">
-    <p class="kpi__label">Reorders due</p>
-    <p class="kpi__value">0</p>
+    <p class="kpi__label">Total spent</p>
+    <p class="kpi__value">₹{{ totalSpent() | number: '1.0-2' }}</p>
   </div>
 </div>
 
-<div class="panel">
-  <div class="empty">
-    <span class="empty__icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M3 8h18v12H3V8Zm0-4h18v4H3V4Zm7 8h4" />
-      </svg>
-    </span>
-    <p class="empty__title">Nothing in stock yet</p>
-    <p class="empty__text">Stock levels will appear here once the inventory table and its API exist.</p>
+@if (error()) {
+  <div class="panel">
+    <div class="empty">
+      <p class="empty__title">Could not load inventory</p>
+      <p class="empty__text">{{ error() }}</p>
+      <button class="btn btn--ghost" type="button" (click)="reload()">Try again</button>
+    </div>
   </div>
-</div>
+} @else if (loading() && purchases().length === 0) {
+  <div class="panel">
+    <div class="empty">
+      <p class="empty__text">Loading inventory…</p>
+    </div>
+  </div>
+} @else if (purchases().length === 0) {
+  <div class="panel">
+    <div class="empty">
+      <span class="empty__icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8h18v12H3V8Zm0-4h18v4H3V4Zm7 8h4" />
+        </svg>
+      </span>
+      <p class="empty__title">Nothing in stock yet</p>
+      <p class="empty__text">Record a purchase and its products will show up here as stock.</p>
+      <button class="btn btn--primary" type="button" (click)="openDialog()">Purchase</button>
+    </div>
+  </div>
+} @else {
+  <section class="panel panel--table">
+    <h2 class="section-title">Stock on hand</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Product</th>
+          <th scope="col">Material</th>
+          <th scope="col">Category</th>
+          <th scope="col" class="num">Quantity</th>
+          <th scope="col" class="num">Total spent</th>
+          <th scope="col">Last purchased</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of stock(); track row.product_id + row.quantity_unit) {
+          <tr>
+            <td class="table__name">{{ row.name }}</td>
+            <td><span class="tag">{{ row.material_type }}</span></td>
+            <td>{{ row.category }}</td>
+            <td class="num table__strong">{{ row.quantity | number: '1.0-3' }} {{ row.quantity_unit }}</td>
+            <td class="num">₹{{ row.total_spent | number: '1.2-2' }}</td>
+            <td>{{ row.last_purchased | date: 'd MMM y' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel panel--table">
+    <h2 class="section-title">Purchase history</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Date</th>
+          <th scope="col">Products</th>
+          <th scope="col" class="num">Items</th>
+          <th scope="col" class="num">Total</th>
+          <th scope="col">Added by</th>
+          <th scope="col"><span class="visually-hidden">Details</span></th>
+        </tr>
+      </thead>
+      @for (purchase of purchases(); track purchase.id) {
+        <tbody>
+          <tr class="purchase-row" [class.is-open]="isExpanded(purchase.id)">
+            <td class="table__name">{{ purchase.purchase_date | date: 'd MMM y' }}</td>
+            <td class="summary">
+              @for (item of purchase.items; track item.id; let last = $last) {
+                {{ item.product_name }}{{ last ? '' : ', ' }}
+              }
+            </td>
+            <td class="num">{{ purchase.items.length }}</td>
+            <td class="num table__strong">₹{{ purchase.total_amount | number: '1.2-2' }}</td>
+            <td>{{ purchase.created_by_username ?? '—' }}</td>
+            <td class="toggle-cell">
+              <button
+                class="toggle"
+                type="button"
+                [attr.aria-expanded]="isExpanded(purchase.id)"
+                [attr.aria-label]="(isExpanded(purchase.id) ? 'Hide' : 'Show') + ' items of this purchase'"
+                (click)="toggle(purchase.id)"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+
+          @if (isExpanded(purchase.id)) {
+            <tr class="detail-row">
+              <td colspan="6">
+                <table class="items">
+                  <thead>
+                    <tr>
+                      <th scope="col">Product</th>
+                      <th scope="col" class="num">Quantity</th>
+                      <th scope="col" class="num">Per unit</th>
+                      <th scope="col" class="num">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of purchase.items; track item.id) {
+                      <tr>
+                        <td>{{ item.product_name }} - {{ item.material_type }} - {{ item.category }}</td>
+                        <td class="num">{{ item.quantity | number: '1.0-3' }} {{ item.quantity_unit }}</td>
+                        <td class="num">₹{{ item.unit_price | number: '1.2-2' }}</td>
+                        <td class="num">₹{{ item.line_total | number: '1.2-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          }
+        </tbody>
+      }
+    </table>
+  </section>
+}
+
+@if (dialogOpen()) {
+  <app-purchase-dialog (closed)="closeDialog()" />
+}

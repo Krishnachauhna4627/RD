@@ -5,7 +5,7 @@ import { ProductDialog } from './product-dialog/product-dialog';
 import type { Product } from '../../../core/products/product.models';
 
 /** The columns a person can sort by. */
-type SortKey = 'name' | 'category' | 'material_type';
+type SortKey = 'name' | 'category' | 'material_type' | 'quantity_unit';
 type SortDirection = 'asc' | 'desc';
 
 /** Columns the table can be grouped under, or 'none' for a flat list. */

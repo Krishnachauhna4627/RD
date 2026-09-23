@@ -70,6 +70,22 @@
         </select>
       </label>
 
+      <label class="field">
+        <span class="field__label">Quantity unit</span>
+        <select
+          class="field__input field__select"
+          name="unit"
+          required
+          [disabled]="saving()"
+          [ngModel]="unit()"
+          (ngModelChange)="unit.set($event)"
+        >
+          @for (option of units; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </label>
+
       <div class="dialog__actions">
         <button class="btn btn--ghost" type="button" [disabled]="saving()" (click)="close()">Cancel</button>
         <button class="btn btn--primary" type="submit" [disabled]="saving()">

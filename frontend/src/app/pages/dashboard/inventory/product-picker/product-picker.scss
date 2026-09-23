@@ -1,0 +1,75 @@
+:host { display: block; }
+
+.picker__input {
+  width: 100%;
+  padding: 8px 32px 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235b6b72' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat right 10px center;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+
+  /* While searching, the picked product stays visible as the placeholder. */
+  &::placeholder { color: #9aa8ad; }
+
+  &:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px var(--green-soft);
+  }
+
+  &[disabled] {
+    background-color: var(--surface-alt);
+    cursor: not-allowed;
+  }
+}
+
+.picker__list {
+  position: fixed;
+  z-index: 80;
+  max-height: 280px;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  list-style: none;
+}
+
+.picker__option {
+  display: grid;
+  gap: 1px;
+  padding: 7px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &.is-active { background: var(--green-soft); }
+  &.is-selected .picker__name { color: var(--green); }
+
+  &[aria-disabled='true'] {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.picker__name {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.picker__meta {
+  color: var(--body);
+  font-size: 12px;
+}
+
+.picker__empty {
+  padding: 10px;
+  color: var(--body);
+  font-size: 13px;
+}

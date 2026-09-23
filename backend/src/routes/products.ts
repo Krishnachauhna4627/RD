@@ -4,6 +4,7 @@ import { ApiError } from '../middleware/error.js';
 import { requireAuth } from '../middleware/auth.js';
 import {
   MATERIAL_TYPES,
+  QUANTITY_UNITS,
   createProduct,
   deleteProduct,
   listProducts,
@@ -19,6 +20,9 @@ const productSchema = z.object({
   category: z.string().trim().min(1, 'Category is required').max(80),
   materialType: z.enum(MATERIAL_TYPES, {
     message: `Material must be one of: ${MATERIAL_TYPES.join(', ')}`,
+  }),
+  quantityUnit: z.enum(QUANTITY_UNITS, {
+    message: `Quantity unit must be one of: ${QUANTITY_UNITS.join(', ')}`,
   }),
 });
 
@@ -36,6 +40,11 @@ productsRouter.get('/materials', (_req, res) => {
   res.json({ materials: MATERIAL_TYPES });
 });
 
+/** GET /api/products/units — the allowed quantity units. */
+productsRouter.get('/units', (_req, res) => {
+  res.json({ units: QUANTITY_UNITS });
+});
+
 /** POST /api/products — add one. */
 productsRouter.post('/', async (req, res, next) => {
   try {
@@ -44,10 +53,10 @@ productsRouter.post('/', async (req, res, next) => {
       throw new ApiError(400, parsed.error.issues[0]?.message ?? 'Invalid product');
     }
 
-    const { name, category, materialType } = parsed.data;
+    const { name, category, materialType, quantityUnit } = parsed.data;
 
     try {
-      res.status(201).json({ product: await createProduct(name, category, materialType) });
+      res.status(201).json({ product: await createProduct(name, category, materialType, quantityUnit) });
     } catch (error) {
       // The (name, material_type) unique key rejected it.
       if (isDuplicate(error)) {
@@ -67,8 +76,16 @@ productsRouter.delete('/:id', async (req, res, next) => {
     if (!Number.isInteger(id) || id < 1) {
       throw new ApiError(400, 'Invalid product id');
     }
-    if (!(await deleteProduct(id))) {
-      throw new ApiError(404, 'Product not found');
+    try {
+      if (!(await deleteProduct(id))) {
+        throw new ApiError(404, 'Product not found');
+      }
+    } catch (error) {
+      // purchase_items still points at it.
+      if (isReferenced(error)) {
+        throw new ApiError(409, 'This product has purchases recorded against it and cannot be deleted.');
+      }
+      throw error;
     }
     res.status(204).send();
   } catch (error) {
@@ -78,4 +95,10 @@ productsRouter.delete('/:id', async (req, res, next) => {
 
 function isDuplicate(error: unknown): boolean {
   return typeof error === 'object' && error !== null && 'code' in error && error.code === 'ER_DUP_ENTRY';
+}
+
+function isReferenced(error: unknown): boolean {
+  return (
+    typeof error === 'object' && error !== null && 'code' in error && error.code === 'ER_ROW_IS_REFERENCED_2'
+  );
 }

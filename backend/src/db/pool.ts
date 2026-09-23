@@ -33,6 +33,10 @@ export const pool: Pool = mysql.createPool({
   // Return DATE/DATETIME as strings rather than JS Dates, so values survive
   // the trip to JSON without the server's timezone rewriting them.
   dateStrings: true,
+
+  // Return DECIMAL columns (money, quantities) as numbers rather than strings.
+  // Safe for the magnitudes stored here, well inside a double's exact range.
+  decimalNumbers: true,
 });
 
 /** The value types MySQL accepts as a bound `?` parameter. */

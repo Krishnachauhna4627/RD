@@ -195,10 +195,32 @@ SQL, **db/pool.ts** owns the connection. Routes do not write SQL.
 | `name` | VARCHAR(160) | |
 | `category` | VARCHAR(80) | free text, indexed |
 | `material_type` | VARCHAR(48) | one of the fixed list, indexed |
+| `quantity_unit` | VARCHAR(24) | one of the fixed unit list, default `Piece` |
 | `created_at` / `updated_at` | TIMESTAMP | |
 
 Unique on **(`name`, `material_type`)** rather than name alone, so a paper cup and a
 plastic cup of the same name can both exist.
+
+### `purchases` / `purchase_items`
+
+One purchase is one bill: `purchase_date` (DATE), `total_amount` (DECIMAL 12,2) and
+`created_by` (user, nullable). Each line in `purchase_items` holds `product_id`,
+`quantity` (DECIMAL 12,3, so weights like 2.5 Kg work), `quantity_unit` (copied from
+the product at purchase time), `unit_price` and `line_total`.
+
+Deleting a purchase deletes its lines. A product with purchase lines **cannot be
+deleted** (FK `RESTRICT`), and the API answers 409 instead.
+
+### `customers`
+
+`customer_name`, `is_regular` (true/false) and `phone` are required. `contact_person`, `email`, `city`,
+`address` and `gstin` are optional, and stored as NULL when left empty. `phone` is
+stored digits-only with an optional leading `+`, and is **unique**, so the same
+shop cannot be added twice. Note that `9876543210` and `+919876543210` count as
+different numbers.
+
+`is_active` (default true) marks whether the customer still orders. Deactivating
+keeps the record; it is changed only through the status endpoint, never by `PUT`.
 
 ### Adding a migration
 
@@ -249,7 +271,7 @@ Requires `Authorization: Bearer <token>`. Returns the whole catalogue, sorted by
 ```json
 { "products": [
   { "id": 1, "name": "Kraft Food Box 750ml", "category": "Food Containers",
-    "material_type": "Paper", "created_at": "...", "updated_at": "..." }
+    "material_type": "Paper", "quantity_unit": "Piece", "created_at": "...", "updated_at": "..." }
 ] }
 ```
 
@@ -258,11 +280,12 @@ Requires `Authorization: Bearer <token>`. Returns the whole catalogue, sorted by
 Requires a token.
 
 ```json
-{ "name": "Kraft Food Box 750ml", "category": "Food Containers", "materialType": "Paper" }
+{ "name": "Kraft Food Box 750ml", "category": "Food Containers", "materialType": "Paper",
+  "quantityUnit": "Piece" }
 ```
 
 **201** `{ "product": { ... } }`
-**400** — missing field, or a `materialType` not on the list
+**400** — missing field, or a `materialType` / `quantityUnit` not on the list
 **409** — that name already exists in that material
 **401** — no or bad token
 
@@ -271,6 +294,9 @@ Requires a token.
 mirrored in `frontend/src/app/core/products/product.models.ts` — **change both**, or
 the dropdown will offer a value the API rejects.
 
+`quantityUnit` must be one of: `Piece`, `Packet`, `Box`, `Dozen`, `Kg`, `Gram`, `Roll`,
+`Bundle` — same rule: the list is in both files, change both.
+
 `category` is free text with suggestions in the UI, so new ranges do not need a
 code change.
 
@@ -278,10 +304,41 @@ code change.
 
 The allowed material list, for building a dropdown without hardcoding it.
 
+### `GET /api/products/units`
+
+The allowed quantity units.
+
 ### `DELETE /api/products/:id`
 
 Requires a token. **204** on success, **404** if it does not exist.
+**409** if the product has purchases recorded against it.
 *No UI calls this yet — the dashboard table is currently read-and-add only.*
+
+### `GET /api/purchases`
+
+Requires a token. Every purchase, newest date first, each with its `items`
+(product name, material and category joined in).
+
+### `POST /api/purchases`
+
+Requires a token.
+
+```json
+{ "purchaseDate": "2026-09-23",
+  "items": [ { "productId": 8, "quantity": 100, "unitPrice": 1.25 } ] }
+```
+
+**201** `{ "purchase": { ..., "items": [ ... ] } }`
+**400** — bad date, no items, quantity ≤ 0, negative price, or an unknown product
+
+Line and bill totals are computed on the server, rounded to 2 decimals. Totals
+sent by the client are ignored.
+
+### `GET /api/purchases/stock`
+
+Requires a token. Stock on hand per product (and unit): summed `quantity`,
+`total_spent` and `last_purchased`. Built only from purchases for now. When sales
+are recorded, subtract them here.
 
 ### `GET /api/auth/me`
 
@@ -360,3 +417,38 @@ Was the user actually created? `npm run db:check` shows the row count, and
 - [ ] `CORS_ORIGIN` set to the real site origin, not `localhost:4200`
 - [ ] TLS in front of the API — login posts a password in the request body
 - [ ] Rate-limit `POST /api/auth/login`; nothing currently slows down guessing
+
+### `GET /api/customers`
+
+Requires a token. Every customer, sorted by customer name.
+
+### `POST /api/customers`
+
+Requires a token.
+
+```json
+{ "customerName": "Sharma Caterers", "isRegular": true, "contactPerson": "Ramesh Sharma",
+  "phone": "98765 43210", "email": "", "city": "Pune", "address": "", "gstin": "" }
+```
+
+**201** `{ "customer": { ... } }`
+**400** — no customer name, `isRegular` missing or not true/false, a phone without 7 to 15 digits, a bad email, or a GSTIN
+not in the 15-character format
+**409** — a customer with that phone already exists
+
+### `PUT /api/customers/:id`
+
+Requires a token. Takes the same body as `POST` and replaces every field.
+
+**200** `{ "customer": { ... } }`
+**400** — same checks as `POST`
+**404** — no customer with that id
+**409** — another customer already has that phone
+
+### `PATCH /api/customers/:id/status`
+
+Requires a token. `{ "isActive": false }` to deactivate, `true` to reactivate.
+
+**200** `{ "customer": { ... } }`
+**400** — `isActive` missing or not true/false
+**404** — no customer with that id

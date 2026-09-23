@@ -1,0 +1,139 @@
+.panel--table {
+  padding: 0;
+  overflow-x: auto;
+
+  & + & { margin-top: 20px; }
+}
+
+.section-title {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  > thead th {
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-alt);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  > tbody > tr > td {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+
+  > tbody:last-child > tr:last-child > td { border-bottom: 0; }
+  > tbody > tr:not(.detail-row):hover { background: #fafcfb; }
+}
+
+.table .num,
+.items .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.table__name {
+  color: var(--ink);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.table__strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.summary {
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--green-soft);
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* ── Expandable purchase rows ──────────────────────────────────── */
+.toggle-cell { width: 52px; }
+
+.toggle {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--body);
+
+  svg { transition: transform 0.18s ease; }
+  &:hover { background: var(--green-soft); color: var(--green); }
+}
+
+.purchase-row.is-open .toggle svg { transform: rotate(180deg); }
+
+.table > tbody > tr.detail-row > td {
+  padding: 0 18px 14px;
+  background: var(--surface-alt);
+}
+
+.purchase-row.is-open > td {
+  background: var(--surface-alt);
+  border-bottom-color: transparent;
+}
+
+.items {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  font-size: 13px;
+
+  th {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    color: var(--body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+  }
+
+  tbody tr:last-child td { border-bottom: 0; }
+}
+
+@media (max-width: 620px) {
+  .table > thead th,
+  .table > tbody > tr > td { padding-inline: 13px; }
+}
