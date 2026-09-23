@@ -5,14 +5,19 @@ import type { Routes } from '@angular/router';
  *
  * The shell (sidebar + topbar) is the parent, and each menu entry is a child
  * rendered into its <router-outlet>. Each child is its own `loadComponent`, so
- * opening Products does not also download Inventory and Customers.
+ * opening Products does not also download the overview, Inventory and Customers.
  */
 export const dashboardRoutes: Routes = [
   {
     path: '',
     loadComponent: () => import('./dashboard').then((m) => m.Dashboard),
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'products' },
+      { path: '', pathMatch: 'full', redirectTo: 'overview' },
+      {
+        path: 'overview',
+        title: 'Dashboard · RD Dashboard',
+        loadComponent: () => import('./overview/overview-page').then((m) => m.OverviewPage),
+      },
       {
         path: 'products',
         title: 'Products · RD Dashboard',

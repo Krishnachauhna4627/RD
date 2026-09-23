@@ -76,6 +76,56 @@
 } @else {
   <section class="panel panel--table">
     <h2 class="section-title">Stock on hand</h2>
+
+    <div class="stock-filters">
+      <input
+        class="sf-control sf-search"
+        type="search"
+        placeholder="Search product…"
+        aria-label="Search stock"
+        [ngModel]="stockSearch()"
+        (ngModelChange)="stockSearch.set($event)"
+      />
+      <select class="sf-control sf-select" aria-label="Material" [ngModel]="stockMaterial()"
+              (ngModelChange)="stockMaterial.set($event)">
+        <option value="">All materials</option>
+        @for (option of stockMaterials(); track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+      <select class="sf-control sf-select" aria-label="Category" [ngModel]="stockCategory()"
+              (ngModelChange)="stockCategory.set($event)">
+        <option value="">All categories</option>
+        @for (option of stockCategories(); track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+      <select class="sf-control sf-select" aria-label="Stock status" [ngModel]="stockStatus()"
+              (ngModelChange)="stockStatus.set($event)">
+        <option value="">Any stock level</option>
+        <option value="in">In stock</option>
+        <option value="low">Low ({{ lowStockAt }} or fewer)</option>
+        <option value="out">Out of stock</option>
+      </select>
+      <button class="btn btn--ghost sf-clear" type="button" [disabled]="!stockFiltersActive()"
+              (click)="clearStockFilters()">
+        Clear
+      </button>
+    </div>
+    <p class="sf-count">
+      @if (stockFiltersActive()) {
+        Showing {{ filteredStock().length }} of {{ stock().length }} products.
+      } @else {
+        {{ stock().length }} product{{ stock().length === 1 ? '' : 's' }}.
+      }
+    </p>
+
+    @if (filteredStock().length === 0) {
+      <div class="empty">
+        <p class="empty__title">No stock matches these filters</p>
+        <button class="btn btn--ghost" type="button" (click)="clearStockFilters()">Clear filters</button>
+      </div>
+    } @else {
     <table class="table">
       <thead>
         <tr>
@@ -90,7 +140,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (row of stock(); track row.product_id + row.quantity_unit) {
+        @for (row of filteredStock(); track row.product_id + row.quantity_unit) {
           <tr>
             <td class="table__name">{{ row.name }}</td>
             <td><span class="tag">{{ row.material_type }}</span></td>
@@ -106,6 +156,7 @@
         }
       </tbody>
     </table>
+    }
   </section>
 
   <section class="panel panel--table">

@@ -1,0 +1,208 @@
+/* ── Stat cards ────────────────────────────────────────────────── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.card {
+  display: block;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+
+  &[href]:hover {
+    border-color: var(--green);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+.card__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card__value {
+  margin-top: 4px;
+  color: var(--ink);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.card__sub {
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Low stock carries an icon and words as well as colour. */
+.card--alert {
+  border-color: #f0c9a8;
+  background: #fff8f2;
+
+  .card__label { color: #9a4a12; }
+}
+
+/* ── Chart + stock summary ─────────────────────────────────────── */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
+  gap: 14px;
+  margin: 6px 0 14px;
+}
+
+.panel__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panel__head--padded { padding: 18px 22px 12px; }
+
+.panel__title { font-size: 16px; }
+
+.panel__sub {
+  margin: 2px 0 14px;
+  font-size: 13px;
+}
+
+.panel__link {
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &:hover { text-decoration: underline; }
+}
+
+.panel--flush { padding: 0; }
+
+.note {
+  padding: 30px 0;
+  text-align: center;
+  font-size: 14px;
+}
+
+.note--padded { padding: 30px 22px; }
+
+.stock-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stock-list__item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+
+  &:last-child { border-bottom: 0; }
+}
+
+.stock-list__name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stock-list__meta {
+  margin-left: 4px;
+  color: var(--body);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.stock-list__qty {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  &.is-low { color: #9a4a12; }
+}
+
+.stock-list__unit {
+  color: var(--body);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* ── Recent transactions ───────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th {
+    padding: 11px 22px;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    background: var(--surface-alt);
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 11px 22px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  tbody tr:last-child td { border-bottom: 0; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+}
+
+.strong { color: var(--ink); font-weight: 500; }
+.nowrap { white-space: nowrap; }
+
+/* Type is spelled out and arrowed, so it never relies on colour alone. */
+.type {
+  display: inline-flex;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: #e8f0fb;
+  color: #1c5cab;
+  font-size: 12px;
+  font-weight: 600;
+
+  &--sale { background: #fdeee7; color: #9a3a12; }
+}
+
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 620px) {
+  .cards { gap: 10px; }
+  .card { padding: 14px; }
+  .card__value { font-size: 20px; }
+  .table th,
+  .table td { padding-inline: 13px; }
+  .panel__head--padded { padding: 16px 16px 10px; }
+}

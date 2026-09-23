@@ -20,6 +20,9 @@ export interface Purchase {
   items: PurchaseItem[];
 }
 
+/** A product at or below this many units in stock counts as low. */
+export const LOW_STOCK_AT = 10;
+
 /** One product's stock on hand: everything purchased minus everything sold. */
 export interface StockRow {
   product_id: number;
