@@ -229,6 +229,11 @@ Primary key **(`customer_id`, `product_id`)**, so one rate per product per custo
 `rate` is DECIMAL(12,2). A product with no row simply has no rate for that
 customer. Rows are deleted along with their customer or product (`CASCADE`).
 
+### `sales` / `sale_items`
+
+Same shape as purchases, plus `customer_id` (required, `RESTRICT`, so a customer with
+sales cannot be deleted). Each line copies the product's unit at sale time.
+
 ### Adding a migration
 
 Drop a new file in `sql/` with the next number prefix (`002_create_products.sql`) and
@@ -343,9 +348,10 @@ sent by the client are ignored.
 
 ### `GET /api/purchases/stock`
 
-Requires a token. Stock on hand per product (and unit): summed `quantity`,
-`total_spent` and `last_purchased`. Built only from purchases for now. When sales
-are recorded, subtract them here.
+Requires a token. Stock on hand per product (and unit): `purchased`, `sold`,
+`quantity` (purchased − sold), `total_spent`, `last_purchased` and `last_sold`.
+`quantity` can go negative if a sale was entered before its purchase. The API allows
+that on purpose, and the dashboard warns instead of blocking the sale.
 
 ### `GET /api/auth/me`
 
@@ -478,3 +484,40 @@ and `null` removes it. Every other rate is left alone. Applied in one transactio
 **400** — negative rate, more than 2 decimals, the same product twice, or an
 unknown product
 **404** — no customer with that id
+
+### `PUT /api/products/:id`
+
+Requires a token. Takes the same body as `POST /api/products` and replaces every field.
+
+**200** `{ "product": { ... } }`
+**400** — same checks as `POST`
+**404** — no product with that id
+**409** — that name already exists in that material
+
+Changing `quantityUnit` does not touch past purchases (each line keeps the unit it
+was bought in) or customer rates.
+
+### `GET /api/sales`
+
+Requires a token. Every sale, newest date first, with `customer_name` and its `items`.
+
+### `POST /api/sales`
+
+Requires a token.
+
+```json
+{ "saleDate": "2026-09-24", "customerId": 3,
+  "items": [ { "productId": 8, "quantity": 10, "unitPrice": 1.5 } ] }
+```
+
+**201** `{ "sale": { ..., "items": [ ... ] } }`
+**400** — bad date, no customer, an inactive or missing customer, no items,
+quantity ≤ 0, negative rate, or an unknown product
+
+Totals are computed on the server. Selling more than is in stock is allowed.
+
+### `GET /api/sales/last-prices?customerId=N`
+
+Requires a token. For each product ever sold to that customer, the `unit_price` and
+`sale_date` of the most recent sale. The Sell dialog shows this as "Last", next to
+the customer's saved rate.

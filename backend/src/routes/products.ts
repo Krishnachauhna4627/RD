@@ -8,6 +8,7 @@ import {
   createProduct,
   deleteProduct,
   listProducts,
+  updateProduct,
 } from '../services/products.js';
 
 export const productsRouter = Router();
@@ -59,6 +60,38 @@ productsRouter.post('/', async (req, res, next) => {
       res.status(201).json({ product: await createProduct(name, category, materialType, quantityUnit) });
     } catch (error) {
       // The (name, material_type) unique key rejected it.
+      if (isDuplicate(error)) {
+        throw new ApiError(409, `"${name}" already exists in ${materialType}.`);
+      }
+      throw error;
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+/** PUT /api/products/:id — replace a product's details. */
+productsRouter.put('/:id', async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id < 1) {
+      throw new ApiError(400, 'Invalid product id');
+    }
+
+    const parsed = productSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new ApiError(400, parsed.error.issues[0]?.message ?? 'Invalid product');
+    }
+
+    const { name, category, materialType, quantityUnit } = parsed.data;
+
+    try {
+      const updated = await updateProduct(id, name, category, materialType, quantityUnit);
+      if (!updated) {
+        throw new ApiError(404, 'Product not found');
+      }
+      res.json({ product: updated });
+    } catch (error) {
       if (isDuplicate(error)) {
         throw new ApiError(409, `"${name}" already exists in ${materialType}.`);
       }

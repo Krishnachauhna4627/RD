@@ -1,3 +1,8 @@
+.page-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .panel--table {
   padding: 0;
   overflow-x: auto;
@@ -55,6 +60,8 @@
 .table__strong {
   color: var(--ink);
   font-weight: 600;
+
+  &.is-negative { color: #b3261e; }
 }
 
 .summary {

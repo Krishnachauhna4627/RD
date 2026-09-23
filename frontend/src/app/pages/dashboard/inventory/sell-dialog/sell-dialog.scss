@@ -1,0 +1,60 @@
+/* Layered on purchase-dialog.scss: only what the sale table adds. */
+.dialog__card--sell { max-width: 1100px; }
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.field--customer { flex: 1 1 280px; max-width: 420px; }
+
+.field__note {
+  color: #8f2b24;
+  font-size: 12px;
+}
+
+.lines__table { min-width: 940px; }
+
+/* Until a customer is chosen the table is shown but plainly not ready. */
+.lines.is-locked tbody { opacity: 0.55; }
+
+.col-prev { width: 160px; }
+
+.cell-num.is-over { border-color: #d9a39d; }
+
+/* A rate filled in automatically reads a little softer than a typed one. */
+.cell-num.is-auto { color: var(--green-dark); background: #f6faf8; }
+
+.stock {
+  display: block;
+  margin-top: 3px;
+  color: var(--body);
+  font-size: 11px;
+  white-space: nowrap;
+
+  &.is-over { color: #b3261e; font-weight: 500; }
+}
+
+.prev {
+  display: block;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.prev--last { color: var(--body); font-weight: 400; }
+.prev--none { color: #9aa8ad; font-weight: 400; }
+
+@media (max-width: 480px) {
+  .field--customer { max-width: none; }
+}
+
+.customer-select {
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5l5-5' stroke='%235b6b72' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}

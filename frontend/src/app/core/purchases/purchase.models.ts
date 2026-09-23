@@ -20,16 +20,20 @@ export interface Purchase {
   items: PurchaseItem[];
 }
 
-/** One product's stock on hand, summed from every purchase. */
+/** One product's stock on hand: everything purchased minus everything sold. */
 export interface StockRow {
   product_id: number;
   name: string;
   category: string;
   material_type: string;
   quantity_unit: string;
+  purchased: number;
+  sold: number;
+  /** purchased - sold; negative if sales were entered before their purchases. */
   quantity: number;
   total_spent: number;
-  last_purchased: string;
+  last_purchased: string | null;
+  last_sold: string | null;
 }
 
 export interface NewPurchase {

@@ -173,13 +173,14 @@
               </span>
             </button>
           </th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
         </tr>
       </thead>
       @for (group of groups(); track group.key) {
         <tbody>
           @if (group.key !== null) {
             <tr class="grouprow">
-              <th class="grouprow__cell" scope="colgroup" colspan="4">
+              <th class="grouprow__cell" scope="colgroup" colspan="5">
                 {{ group.key }}
                 <span class="grouprow__count">{{ group.rows.length }}</span>
               </th>
@@ -192,6 +193,20 @@
               <td>{{ product.category }}</td>
               <td><span class="tag">{{ product.material_type }}</span></td>
               <td>{{ product.quantity_unit }}</td>
+              <td class="table__actions">
+                <button
+                  class="edit-btn"
+                  type="button"
+                  [attr.aria-label]="'Edit ' + product.name + ' ' + product.material_type"
+                  (click)="editProduct(product)"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                  </svg>
+                  Edit
+                </button>
+              </td>
             </tr>
           }
         </tbody>
@@ -202,5 +217,5 @@
 }
 
 @if (dialogOpen()) {
-  <app-product-dialog (closed)="closeDialog()" />
+  <app-product-dialog [product]="editingProduct()" (closed)="closeDialog()" />
 }

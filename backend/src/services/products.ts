@@ -81,6 +81,23 @@ export async function createProduct(
   return created;
 }
 
+/** Replaces every editable field. Returns null when there is no such product. */
+export async function updateProduct(
+  id: number,
+  name: string,
+  category: string,
+  materialType: string,
+  quantityUnit: string,
+): Promise<ProductRow | null> {
+  await execute(
+    'UPDATE products SET name = ?, category = ?, material_type = ?, quantity_unit = ? WHERE id = ?',
+    [name, category, materialType, quantityUnit, id],
+  );
+  // Read it back rather than trust affectedRows, which is 0 both for a
+  // missing id and for a save that changed nothing.
+  return findProductById(id);
+}
+
 export async function deleteProduct(id: number): Promise<boolean> {
   const result = await execute('DELETE FROM products WHERE id = ?', [id]);
   return result.affectedRows > 0;

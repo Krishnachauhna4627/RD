@@ -30,6 +30,8 @@ export class ProductsPage {
   protected readonly error = this.service.error;
 
   protected readonly dialogOpen = signal(false);
+  /** Set while the dialog is editing a product; null means it is adding. */
+  protected readonly editingProduct = signal<Product | null>(null);
   protected readonly sortKey = signal<SortKey>('name');
   protected readonly sortDirection = signal<SortDirection>('asc');
   protected readonly groupBy = signal<GroupKey>('none');
@@ -184,11 +186,18 @@ export class ProductsPage {
   }
 
   protected openDialog(): void {
+    this.editingProduct.set(null);
+    this.dialogOpen.set(true);
+  }
+
+  protected editProduct(product: Product): void {
+    this.editingProduct.set(product);
     this.dialogOpen.set(true);
   }
 
   protected closeDialog(): void {
     this.dialogOpen.set(false);
+    this.editingProduct.set(null);
   }
 
   protected reload(): void {

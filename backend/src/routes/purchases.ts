@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { ApiError } from '../middleware/error.js';
 import { requireAuth } from '../middleware/auth.js';
-import { UnknownProductError, createPurchase, listPurchases, listStock } from '../services/purchases.js';
+import { UnknownProductError, createPurchase, listPurchases } from '../services/purchases.js';
+import { listStock } from '../services/stock.js';
 
 export const purchasesRouter = Router();
 
@@ -32,7 +33,7 @@ purchasesRouter.get('/', async (_req, res, next) => {
   }
 });
 
-/** GET /api/purchases/stock — quantity on hand per product, from purchases. */
+/** GET /api/purchases/stock — quantity on hand per product: purchased minus sold. */
 purchasesRouter.get('/stock', async (_req, res, next) => {
   try {
     res.json({ stock: await listStock() });

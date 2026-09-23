@@ -39,17 +39,6 @@ export interface Purchase {
   items: PurchaseItemRow[];
 }
 
-export interface StockRow extends RowDataPacket {
-  product_id: number;
-  name: string;
-  category: string;
-  material_type: string;
-  quantity_unit: string;
-  quantity: number;
-  total_spent: number;
-  last_purchased: string;
-}
-
 interface ProductUnitRow extends RowDataPacket {
   id: number;
   quantity_unit: string;
@@ -154,22 +143,4 @@ export async function listPurchases(onlyId?: number): Promise<Purchase[]> {
     ...header,
     items: itemsByPurchase.get(header.id) ?? [],
   }));
-}
-
-/**
- * Stock on hand per product: everything purchased so far. Grouped by unit as
- * well, so a product whose unit changed shows its Kg and Piece stock apart
- * instead of adding the two together.
- */
-export function listStock(): Promise<StockRow[]> {
-  return query<StockRow>(
-    `SELECT pr.id AS product_id, pr.name, pr.category, pr.material_type, i.quantity_unit,
-            SUM(i.quantity) AS quantity, SUM(i.line_total) AS total_spent,
-            MAX(p.purchase_date) AS last_purchased
-       FROM purchase_items i
-       JOIN purchases p ON p.id = i.purchase_id
-       JOIN products pr ON pr.id = i.product_id
-      GROUP BY pr.id, pr.name, pr.category, pr.material_type, i.quantity_unit
-      ORDER BY pr.name ASC`,
-  );
 }

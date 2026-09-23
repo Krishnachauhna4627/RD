@@ -1,16 +1,25 @@
 <div class="page-head">
   <div>
     <h1 class="page-head__title">Inventory</h1>
-    <p class="page-head__sub">Stock on hand, built up from the purchases you record.</p>
+    <p class="page-head__sub">Stock on hand: everything purchased, minus everything sold.</p>
   </div>
 
-  <button class="btn btn--primary" type="button" (click)="openDialog()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-         stroke-linecap="round" aria-hidden="true">
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-    Purchase
-  </button>
+  <div class="page-actions">
+    <button class="btn btn--primary" type="button" (click)="open('purchase')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Purchase
+    </button>
+    <button class="btn btn--primary" type="button" (click)="open('sell')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6M9 21h.01M18 21h.01" />
+      </svg>
+      Sell
+    </button>
+  </div>
 </div>
 
 <div class="kpi-row">
@@ -26,6 +35,14 @@
     <p class="kpi__label">Total spent</p>
     <p class="kpi__value">₹{{ totalSpent() | number: '1.0-2' }}</p>
   </div>
+  <div class="kpi">
+    <p class="kpi__label">Sales</p>
+    <p class="kpi__value">{{ sales().length }}</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi__label">Total sold</p>
+    <p class="kpi__value">₹{{ totalSold() | number: '1.0-2' }}</p>
+  </div>
 </div>
 
 @if (error()) {
@@ -36,13 +53,13 @@
       <button class="btn btn--ghost" type="button" (click)="reload()">Try again</button>
     </div>
   </div>
-} @else if (loading() && purchases().length === 0) {
+} @else if (loading() && !hasActivity()) {
   <div class="panel">
     <div class="empty">
       <p class="empty__text">Loading inventory…</p>
     </div>
   </div>
-} @else if (purchases().length === 0) {
+} @else if (!hasActivity()) {
   <div class="panel">
     <div class="empty">
       <span class="empty__icon">
@@ -53,7 +70,7 @@
       </span>
       <p class="empty__title">Nothing in stock yet</p>
       <p class="empty__text">Record a purchase and its products will show up here as stock.</p>
-      <button class="btn btn--primary" type="button" (click)="openDialog()">Purchase</button>
+      <button class="btn btn--primary" type="button" (click)="open('purchase')">Purchase</button>
     </div>
   </div>
 } @else {
@@ -65,9 +82,11 @@
           <th scope="col">Product</th>
           <th scope="col">Material</th>
           <th scope="col">Category</th>
-          <th scope="col" class="num">Quantity</th>
-          <th scope="col" class="num">Total spent</th>
+          <th scope="col" class="num">Purchased</th>
+          <th scope="col" class="num">Sold</th>
+          <th scope="col" class="num">In stock</th>
           <th scope="col">Last purchased</th>
+          <th scope="col">Last sold</th>
         </tr>
       </thead>
       <tbody>
@@ -76,15 +95,20 @@
             <td class="table__name">{{ row.name }}</td>
             <td><span class="tag">{{ row.material_type }}</span></td>
             <td>{{ row.category }}</td>
-            <td class="num table__strong">{{ row.quantity | number: '1.0-3' }} {{ row.quantity_unit }}</td>
-            <td class="num">₹{{ row.total_spent | number: '1.2-2' }}</td>
-            <td>{{ row.last_purchased | date: 'd MMM y' }}</td>
+            <td class="num">{{ row.purchased | number: '1.0-3' }}</td>
+            <td class="num">{{ row.sold | number: '1.0-3' }}</td>
+            <td class="num table__strong" [class.is-negative]="row.quantity < 0">
+              {{ row.quantity | number: '1.0-3' }} {{ row.quantity_unit }}
+            </td>
+            <td>{{ row.last_purchased ? (row.last_purchased | date: 'd MMM y') : '—' }}</td>
+            <td>{{ row.last_sold ? (row.last_sold | date: 'd MMM y') : '—' }}</td>
           </tr>
         }
       </tbody>
     </table>
   </section>
 
+  @if (purchases().length > 0) {
   <section class="panel panel--table">
     <h2 class="section-title">Purchase history</h2>
     <table class="table">
@@ -100,7 +124,7 @@
       </thead>
       @for (purchase of purchases(); track purchase.id) {
         <tbody>
-          <tr class="purchase-row" [class.is-open]="isExpanded(purchase.id)">
+          <tr class="purchase-row" [class.is-open]="isExpanded('p' + purchase.id)">
             <td class="table__name">{{ purchase.purchase_date | date: 'd MMM y' }}</td>
             <td class="summary">
               @for (item of purchase.items; track item.id; let last = $last) {
@@ -114,9 +138,9 @@
               <button
                 class="toggle"
                 type="button"
-                [attr.aria-expanded]="isExpanded(purchase.id)"
-                [attr.aria-label]="(isExpanded(purchase.id) ? 'Hide' : 'Show') + ' items of this purchase'"
-                (click)="toggle(purchase.id)"
+                [attr.aria-expanded]="isExpanded('p' + purchase.id)"
+                [attr.aria-label]="(isExpanded('p' + purchase.id) ? 'Hide' : 'Show') + ' items of this purchase'"
+                (click)="toggle('p' + purchase.id)"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -126,7 +150,7 @@
             </td>
           </tr>
 
-          @if (isExpanded(purchase.id)) {
+          @if (isExpanded('p' + purchase.id)) {
             <tr class="detail-row">
               <td colspan="6">
                 <table class="items">
@@ -156,8 +180,89 @@
       }
     </table>
   </section>
+  }
+
+  @if (sales().length > 0) {
+  <section class="panel panel--table">
+    <h2 class="section-title">Sales history</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Date</th>
+          <th scope="col">Customer</th>
+          <th scope="col">Products</th>
+          <th scope="col" class="num">Items</th>
+          <th scope="col" class="num">Total</th>
+          <th scope="col">Added by</th>
+          <th scope="col"><span class="visually-hidden">Details</span></th>
+        </tr>
+      </thead>
+      @for (sale of sales(); track sale.id) {
+        <tbody>
+          <tr class="purchase-row" [class.is-open]="isExpanded('s' + sale.id)">
+            <td class="table__name">{{ sale.sale_date | date: 'd MMM y' }}</td>
+            <td class="table__name">{{ sale.customer_name }}</td>
+            <td class="summary">
+              @for (item of sale.items; track item.id; let last = $last) {
+                {{ item.product_name }}{{ last ? '' : ', ' }}
+              }
+            </td>
+            <td class="num">{{ sale.items.length }}</td>
+            <td class="num table__strong">₹{{ sale.total_amount | number: '1.2-2' }}</td>
+            <td>{{ sale.created_by_username ?? '—' }}</td>
+            <td class="toggle-cell">
+              <button
+                class="toggle"
+                type="button"
+                [attr.aria-expanded]="isExpanded('s' + sale.id)"
+                [attr.aria-label]="(isExpanded('s' + sale.id) ? 'Hide' : 'Show') + ' items of this sale'"
+                (click)="toggle('s' + sale.id)"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+
+          @if (isExpanded('s' + sale.id)) {
+            <tr class="detail-row">
+              <td colspan="7">
+                <table class="items">
+                  <thead>
+                    <tr>
+                      <th scope="col">Product</th>
+                      <th scope="col" class="num">Quantity</th>
+                      <th scope="col" class="num">Rate</th>
+                      <th scope="col" class="num">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of sale.items; track item.id) {
+                      <tr>
+                        <td>{{ item.product_name }} - {{ item.material_type }} - {{ item.category }}</td>
+                        <td class="num">{{ item.quantity | number: '1.0-3' }} {{ item.quantity_unit }}</td>
+                        <td class="num">₹{{ item.unit_price | number: '1.2-2' }}</td>
+                        <td class="num">₹{{ item.line_total | number: '1.2-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          }
+        </tbody>
+      }
+    </table>
+  </section>
+  }
 }
 
-@if (dialogOpen()) {
+@if (dialog() === 'purchase') {
   <app-purchase-dialog (closed)="closeDialog()" />
+}
+
+@if (dialog() === 'sell') {
+  <app-sell-dialog (closed)="closeDialog()" />
 }

@@ -1,17 +1,19 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { catchError, map, tap, throwError, type Observable } from 'rxjs';
-import type { NewProduct, Product } from './product.models';
+import { PurchasesService } from '../purchases/purchases.service';
+import type { LastPrice, NewSale, Sale } from './sale.models';
 
 @Injectable({ providedIn: 'root' })
-export class ProductsService {
+export class SalesService {
   private readonly http = inject(HttpClient);
+  private readonly purchases = inject(PurchasesService);
 
-  private readonly _products = signal<Product[]>([]);
+  private readonly _sales = signal<Sale[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<string | null>(null);
 
-  readonly products = this._products.asReadonly();
+  readonly sales = this._sales.asReadonly();
   readonly loading = this._loading.asReadonly();
   readonly error = this._error.asReadonly();
 
@@ -20,11 +22,11 @@ export class ProductsService {
     this._error.set(null);
 
     this.http
-      .get<{ products: Product[] }>('/api/products')
+      .get<{ sales: Sale[] }>('/api/sales')
       .pipe(catchError((error: HttpErrorResponse) => throwError(() => new Error(messageFor(error)))))
       .subscribe({
-        next: ({ products }) => {
-          this._products.set(products);
+        next: ({ sales }) => {
+          this._sales.set(sales);
           this._loading.set(false);
         },
         error: (err: Error) => {
@@ -34,26 +36,21 @@ export class ProductsService {
       });
   }
 
-  create(product: NewProduct): Observable<Product> {
-    return this.http.post<{ product: Product }>('/api/products', product).pipe(
-      // Unwrap to the product itself, so callers do not deal with the envelope.
-      map(({ product: created }) => created),
-      tap((created) => this._products.update((list) => [...list, created])),
+  lastPrices(customerId: number): Observable<LastPrice[]> {
+    return this.http.get<{ prices: LastPrice[] }>('/api/sales/last-prices', { params: { customerId } }).pipe(
+      map(({ prices }) => prices),
       catchError((error: HttpErrorResponse) => throwError(() => new Error(messageFor(error)))),
     );
   }
 
-  update(id: number, product: NewProduct): Observable<Product> {
-    return this.http.put<{ product: Product }>(`/api/products/${id}`, product).pipe(
-      map(({ product: updated }) => updated),
-      tap((updated) => this._products.update((list) => list.map((p) => (p.id === id ? updated : p)))),
-      catchError((error: HttpErrorResponse) => throwError(() => new Error(messageFor(error)))),
-    );
-  }
-
-  remove(id: number): Observable<void> {
-    return this.http.delete<void>(`/api/products/${id}`).pipe(
-      tap(() => this._products.update((list) => list.filter((p) => p.id !== id))),
+  create(sale: NewSale): Observable<Sale> {
+    return this.http.post<{ sale: Sale }>('/api/sales', sale).pipe(
+      map(({ sale: created }) => created),
+      tap((created) => {
+        this._sales.update((list) => [created, ...list]);
+        // A sale changes stock, which the purchases service holds.
+        this.purchases.load();
+      }),
       catchError((error: HttpErrorResponse) => throwError(() => new Error(messageFor(error)))),
     );
   }
