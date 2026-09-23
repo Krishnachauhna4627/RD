@@ -14,6 +14,12 @@
   flex-direction: column;
   flex: none;
   width: 246px;
+  /* Pinned to the window height, so Logout stays at the bottom and in view
+     however long the page is. */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
   padding: 22px 16px;
   background: #fff;
   border-right: 1px solid var(--line);
@@ -31,7 +37,12 @@
   gap: 3px;
   align-content: start;
   flex: 1;
+  /* With more links than fit, only the menu scrolls; Logout stays put. */
+  min-height: 0;
+  overflow-y: auto;
 }
+
+.navitem--logout { flex: none; }
 
 .navitem {
   display: flex;
