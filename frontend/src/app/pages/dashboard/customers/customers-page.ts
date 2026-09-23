@@ -3,12 +3,13 @@ import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomersService } from '../../../core/customers/customers.service';
 import { CustomerDialog } from './customer-dialog/customer-dialog';
+import { RatesDialog } from './rates-dialog/rates-dialog';
 import type { Customer } from '../../../core/customers/customer.models';
 
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 @Component({
-  imports: [CustomerDialog, FormsModule, DatePipe],
+  imports: [CustomerDialog, RatesDialog, FormsModule, DatePipe],
   selector: 'app-customers-page',
   templateUrl: './customers-page.html',
   styleUrl: './customers-page.scss',
@@ -22,6 +23,8 @@ export class CustomersPage {
   protected readonly dialogOpen = signal(false);
   /** Set while the dialog is editing someone; null means it is adding. */
   protected readonly editingCustomer = signal<Customer | null>(null);
+  /** The customer whose rates dialog is open, if any. */
+  protected readonly ratesCustomer = signal<Customer | null>(null);
 
   /** '' means "all" / "no search". */
   protected readonly search = signal('');
@@ -134,6 +137,14 @@ export class CustomersPage {
   protected editCustomer(customer: Customer): void {
     this.editingCustomer.set(customer);
     this.dialogOpen.set(true);
+  }
+
+  protected openRates(customer: Customer): void {
+    this.ratesCustomer.set(customer);
+  }
+
+  protected closeRates(): void {
+    this.ratesCustomer.set(null);
   }
 
   protected closeDialog(): void {

@@ -5,7 +5,7 @@ import type { Routes } from '@angular/router';
  *
  * The shell (sidebar + topbar) is the parent, and each menu entry is a child
  * rendered into its <router-outlet>. Each child is its own `loadComponent`, so
- * opening Products does not also download Inventory, Customers and Sell.
+ * opening Products does not also download Inventory and Customers.
  */
 export const dashboardRoutes: Routes = [
   {
@@ -27,11 +27,6 @@ export const dashboardRoutes: Routes = [
         path: 'customers',
         title: 'Customers · RD Dashboard',
         loadComponent: () => import('./customers/customers-page').then((m) => m.CustomersPage),
-      },
-      {
-        path: 'sell',
-        title: 'Sell · RD Dashboard',
-        loadComponent: () => import('./sell/sell-page').then((m) => m.SellPage),
       },
     ],
   },

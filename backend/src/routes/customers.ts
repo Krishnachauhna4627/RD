@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { ApiError } from '../middleware/error.js';
 import { requireAuth } from '../middleware/auth.js';
-import { createCustomer, listCustomers, setCustomerActive, updateCustomer } from '../services/customers.js';
+import { createCustomer, findCustomerById, listCustomers, setCustomerActive, updateCustomer } from '../services/customers.js';
+import { UnknownProductError, listCustomerRates, saveCustomerRates } from '../services/customer-rates.js';
 
 export const customersRouter = Router();
 
@@ -124,6 +125,82 @@ customersRouter.patch('/:id/status', async (req, res, next) => {
       throw new ApiError(404, 'Customer not found');
     }
     res.json({ customer: updated });
+  } catch (error) {
+    next(error);
+  }
+});
+
+const ratesSchema = z.object({
+  rates: z
+    .array(
+      z.object({
+        productId: z.number().int().positive(),
+        // null clears the rate. Money, so at most two decimals.
+        rate: z
+          .number()
+          .nonnegative('A rate cannot be negative')
+          .max(1_000_000_000, 'That rate is too large')
+          // Compared with a tolerance: 1.15 * 100 is 114.99999999999999 in floating point.
+          .refine((value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-6, {
+            message: 'A rate can have at most 2 decimals',
+          })
+          .nullable(),
+      }),
+    )
+    .max(5000, 'Too many rates in one save')
+    .refine((list) => new Set(list.map((r) => r.productId)).size === list.length, {
+      message: 'Each product can appear only once',
+    }),
+});
+
+/** Parses :id and makes sure that customer exists, for the rate routes. */
+async function customerIdFrom(raw: string | undefined): Promise<number> {
+  const id = Number(raw);
+  if (!Number.isInteger(id) || id < 1) {
+    throw new ApiError(400, 'Invalid customer id');
+  }
+  if (!(await findCustomerById(id))) {
+    throw new ApiError(404, 'Customer not found');
+  }
+  return id;
+}
+
+/** GET /api/customers/:id/rates — the rates set for this customer. */
+customersRouter.get('/:id/rates', async (req, res, next) => {
+  try {
+    const id = await customerIdFrom(req.params.id);
+    res.json({ rates: await listCustomerRates(id) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * PUT /api/customers/:id/rates — set or clear rates. Only the products sent
+ * change; a rate of null removes that product's rate.
+ */
+customersRouter.put('/:id/rates', async (req, res, next) => {
+  try {
+    const id = await customerIdFrom(req.params.id);
+
+    const parsed = ratesSchema.safeParse(req.body);
+    if (!parsed.success) {
+      throw new ApiError(400, parsed.error.issues[0]?.message ?? 'Invalid rates');
+    }
+
+    if (parsed.data.rates.length === 0) {
+      res.json({ rates: await listCustomerRates(id) });
+      return;
+    }
+
+    try {
+      res.json({ rates: await saveCustomerRates(id, parsed.data.rates, req.user?.sub ?? null) });
+    } catch (error) {
+      if (error instanceof UnknownProductError) {
+        throw new ApiError(400, 'One of the products no longer exists. Reload and try again.');
+      }
+      throw error;
+    }
   } catch (error) {
     next(error);
   }

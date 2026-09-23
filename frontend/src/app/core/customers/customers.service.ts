@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { catchError, map, tap, throwError, type Observable } from 'rxjs';
-import type { Customer, NewCustomer } from './customer.models';
+import type { Customer, CustomerRate, NewCustomer, RateChange } from './customer.models';
 
 @Injectable({ providedIn: 'root' })
 export class CustomersService {
@@ -54,6 +54,22 @@ export class CustomersService {
     return this.http.patch<{ customer: Customer }>(`/api/customers/${id}/status`, { isActive }).pipe(
       map(({ customer: updated }) => updated),
       tap((updated) => this._customers.update((list) => list.map((c) => (c.id === id ? updated : c)))),
+      catchError((error: HttpErrorResponse) => throwError(() => new Error(messageFor(error)))),
+    );
+  }
+
+  /** Rates are fetched per customer when the rates dialog opens, not cached. */
+  getRates(id: number): Observable<CustomerRate[]> {
+    return this.http.get<{ rates: CustomerRate[] }>(`/api/customers/${id}/rates`).pipe(
+      map(({ rates }) => rates),
+      catchError((error: HttpErrorResponse) => throwError(() => new Error(messageFor(error)))),
+    );
+  }
+
+  /** Sends only the changed products; returns the customer's full set afterwards. */
+  saveRates(id: number, rates: RateChange[]): Observable<CustomerRate[]> {
+    return this.http.put<{ rates: CustomerRate[] }>(`/api/customers/${id}/rates`, { rates }).pipe(
+      map(({ rates: saved }) => saved),
       catchError((error: HttpErrorResponse) => throwError(() => new Error(messageFor(error)))),
     );
   }

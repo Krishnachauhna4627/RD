@@ -28,7 +28,6 @@ export class Dashboard {
     { label: 'Products', path: 'products', icon: 'M3 7l9-4 9 4-9 4-9-4Zm0 5 9 4 9-4M3 17l9 4 9-4' },
     { label: 'Inventory', path: 'inventory', icon: 'M3 8h18v12H3V8Zm0-4h18v4H3V4Zm7 8h4' },
     { label: 'Customers', path: 'customers', icon: 'M16 20v-2a4 4 0 0 0-8 0v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z' },
-    { label: 'Sell', path: 'sell', icon: 'M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6M9 21h.01M18 21h.01' },
   ];
 
   protected toggleSidebar(): void {

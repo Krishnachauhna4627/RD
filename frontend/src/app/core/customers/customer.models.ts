@@ -25,3 +25,16 @@ export interface NewCustomer {
   address: string;
   gstin: string;
 }
+
+/** A price agreed with one customer for one product, per its quantity unit. */
+export interface CustomerRate {
+  product_id: number;
+  rate: number;
+  updated_at: string;
+}
+
+/** A number sets the rate; null removes it. */
+export interface RateChange {
+  productId: number;
+  rate: number | null;
+}

@@ -1,0 +1,141 @@
+<div class="dialog">
+  <button class="dialog__scrim" type="button" tabindex="-1" aria-hidden="true" (click)="close()"></button>
+
+  <div class="dialog__card" role="dialog" aria-modal="true" aria-labelledby="rates-dialog-title">
+    <div class="dialog__head">
+      <div>
+        <p class="dialog__eyebrow">Rates for{{ customer().is_active ? '' : ' · inactive customer' }}</p>
+        <h2 class="dialog__title" id="rates-dialog-title">{{ customer().customer_name }}</h2>
+      </div>
+      <button class="dialog__close" type="button" aria-label="Close" (click)="close()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div class="filters">
+      <label class="search">
+        <span class="visually-hidden">Search products</span>
+        <svg class="search__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+        </svg>
+        <input
+          class="control search__input"
+          type="search"
+          placeholder="Search products…"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </label>
+
+      <select class="control select" aria-label="Material" [ngModel]="filterMaterial()"
+              (ngModelChange)="filterMaterial.set($event)">
+        <option value="">All materials</option>
+        @for (option of materialOptions(); track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+
+      <select class="control select" aria-label="Category" [ngModel]="filterCategory()"
+              (ngModelChange)="filterCategory.set($event)">
+        <option value="">All categories</option>
+        @for (option of categoryOptions(); track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+
+      <select class="control select" aria-label="Rate status" [ngModel]="filterSet()"
+              (ngModelChange)="filterSet.set($event)">
+        <option value="">With and without rate</option>
+        <option value="set">Rate set</option>
+        <option value="unset">No rate yet</option>
+      </select>
+    </div>
+
+    <p class="summary">
+      {{ rateCount() }} of {{ totalProducts() }} products have a rate.
+      @if (filtersActive()) {
+        Showing {{ rows().length }}.
+        <button class="link-btn" type="button" (click)="clearFilters()">Clear filters</button>
+      }
+    </p>
+
+    <div class="body">
+      @if (loadingRates() || (productsLoading() && rows().length === 0)) {
+        <p class="state">Loading rates…</p>
+      } @else if (rows().length === 0) {
+        <p class="state">
+          @if (filtersActive()) { No products match these filters. } @else { No products yet — add some on the Products page first. }
+        </p>
+      } @else {
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Product</th>
+              <th scope="col">Material</th>
+              <th scope="col">Category</th>
+              <th scope="col" class="num">Rate (₹)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of rows(); track product.id; let i = $index) {
+              <tr [class.is-changed]="isChanged(product.id)">
+                <td class="name">{{ product.name }}</td>
+                <td><span class="tag">{{ product.material_type }}</span></td>
+                <td>{{ product.category }}</td>
+                <td class="num">
+                  <span class="rate">
+                    <input
+                      class="control rate-input"
+                      type="text"
+                      inputmode="decimal"
+                      autocomplete="off"
+                      placeholder="—"
+                      [class.is-invalid]="invalidIds().has(product.id)"
+                      [attr.aria-label]="'Rate for ' + product.name + ' ' + product.material_type"
+                      [attr.aria-invalid]="invalidIds().has(product.id)"
+                      [disabled]="saving()"
+                      [ngModel]="valueOf(product.id)"
+                      (ngModelChange)="setDraft(product.id, $event)"
+                      (keydown.enter)="nextRow($event, i)"
+                    />
+                    <span class="rate__unit">/ {{ product.quantity_unit }}</span>
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    @if (error()) {
+      <p class="message message--error" role="alert">{{ error() }}</p>
+    } @else if (confirmDiscard()) {
+      <p class="message message--warn" role="alert">
+        You have {{ changes().length }} unsaved rate{{ changes().length === 1 ? '' : 's' }}. Close again to discard them.
+      </p>
+    } @else if (notice()) {
+      <p class="message message--ok" role="status">{{ notice() }}</p>
+    }
+
+    <div class="dialog__actions">
+      <span class="hint">Leave a box empty for no rate. <kbd>Enter</kbd> moves to the next product.</span>
+      <button class="btn btn--ghost" type="button" [disabled]="saving()" (click)="close()">
+        {{ confirmDiscard() ? 'Discard & close' : 'Close' }}
+      </button>
+      <button class="btn btn--primary" type="button" [disabled]="saving() || loadingRates()" (click)="save()">
+        @if (saving()) {
+          Saving…
+        } @else if (dirty()) {
+          Save {{ changes().length }} rate{{ changes().length === 1 ? '' : 's' }}
+        } @else {
+          Save rates
+        }
+      </button>
+    </div>
+  </div>
+</div>

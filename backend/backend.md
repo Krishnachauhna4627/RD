@@ -222,6 +222,13 @@ different numbers.
 `is_active` (default true) marks whether the customer still orders. Deactivating
 keeps the record; it is changed only through the status endpoint, never by `PUT`.
 
+### `customer_rates`
+
+The price agreed with a customer for a product, per the product's quantity unit.
+Primary key **(`customer_id`, `product_id`)**, so one rate per product per customer.
+`rate` is DECIMAL(12,2). A product with no row simply has no rate for that
+customer. Rows are deleted along with their customer or product (`CASCADE`).
+
 ### Adding a migration
 
 Drop a new file in `sql/` with the next number prefix (`002_create_products.sql`) and
@@ -451,4 +458,23 @@ Requires a token. `{ "isActive": false }` to deactivate, `true` to reactivate.
 
 **200** `{ "customer": { ... } }`
 **400** — `isActive` missing or not true/false
+**404** — no customer with that id
+
+### `GET /api/customers/:id/rates`
+
+Requires a token. `{ "rates": [ { "product_id": 8, "rate": 1.5, "updated_at": "..." } ] }`
+**404** if the customer does not exist.
+
+### `PUT /api/customers/:id/rates`
+
+Requires a token. Send only the products that changed. A number sets the rate,
+and `null` removes it. Every other rate is left alone. Applied in one transaction.
+
+```json
+{ "rates": [ { "productId": 8, "rate": 1.5 }, { "productId": 6, "rate": null } ] }
+```
+
+**200** — the customer's full set of rates after the save
+**400** — negative rate, more than 2 decimals, the same product twice, or an
+unknown product
 **404** — no customer with that id
