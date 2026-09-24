@@ -1,0 +1,103 @@
+<div class="dialog">
+  <button class="dialog__scrim" type="button" tabindex="-1" aria-hidden="true" (click)="close()"></button>
+
+  <div class="dialog__card" role="dialog" aria-modal="true" aria-labelledby="product-dialog-title">
+    <div class="dialog__head">
+      <h2 class="dialog__title" id="product-dialog-title">{{ editing() ? 'Edit product' : 'Add product' }}</h2>
+      <button class="dialog__close" type="button" aria-label="Close" (click)="close()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    @if (error()) {
+      <p class="dialog__error" role="alert">{{ error() }}</p>
+    }
+
+    <form class="dialog__form" (ngSubmit)="submit()">
+      <label class="field">
+        <span class="field__label">Product name</span>
+        <input
+          class="field__input"
+          type="text"
+          name="name"
+          placeholder="e.g. Disposable Cups 200ml"
+          maxlength="160"
+          required
+          [disabled]="saving()"
+          [ngModel]="name()"
+          (ngModelChange)="name.set($event)"
+        />
+      </label>
+
+      <label class="field">
+        <span class="field__label">Category</span>
+        <input
+          class="field__input"
+          type="text"
+          name="category"
+          list="product-categories"
+          placeholder="Pick one or type your own"
+          maxlength="80"
+          required
+          [disabled]="saving()"
+          [ngModel]="category()"
+          (ngModelChange)="category.set($event)"
+        />
+        <datalist id="product-categories">
+          @for (option of categories; track option) {
+            <option [value]="option"></option>
+          }
+        </datalist>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Material type</span>
+        <select
+          class="field__input field__select"
+          name="material"
+          required
+          [disabled]="saving()"
+          [ngModel]="material()"
+          (ngModelChange)="material.set($event)"
+        >
+          <option value="" disabled>Select a material</option>
+          @for (option of materials; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Quantity unit</span>
+        <select
+          class="field__input field__select"
+          name="unit"
+          required
+          [disabled]="saving()"
+          [ngModel]="unit()"
+          (ngModelChange)="unit.set($event)"
+        >
+          @for (option of units; track option) {
+            <option [value]="option">{{ option }}</option>
+          }
+        </select>
+        @if (unitChanged()) {
+          <span class="field__warn">
+            Past purchases stay recorded in {{ product()!.quantity_unit }}, and customer rates are not
+            converted. Check the rates for this product after saving.
+          </span>
+        }
+      </label>
+
+      <div class="dialog__actions">
+        <button class="btn btn--ghost" type="button" [disabled]="saving()" (click)="close()">Cancel</button>
+        <button class="btn btn--primary" type="submit" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : editing() ? 'Save changes' : 'Add product' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,154 @@
+:host {
+  display: block;
+  /* Series slots 1 and 2 of the validated reference palette. */
+  --series-purchase: #2a78d6;
+  --series-sale: #eb6834;
+}
+
+.chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink);
+  font-size: 13px;
+
+  li { display: flex; align-items: center; gap: 7px; }
+}
+
+.swatch {
+  display: inline-block;
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+
+  &--purchase { background: var(--series-purchase); }
+  &--sale { background: var(--series-sale); }
+}
+
+.view-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 500;
+
+  &:hover { text-decoration: underline; }
+}
+
+.plot { position: relative; }
+
+svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.grid { stroke: var(--line); stroke-width: 1; }
+.grid--base { stroke: #c9d2cf; }
+
+.axis {
+  fill: var(--body);
+  font-size: 11px;
+}
+
+.axis--y { text-anchor: end; }
+
+/* The SVG scales down with its box, text included; on a phone the viewBox is
+   roughly halved, so double the label size to keep it readable. */
+@media (max-width: 600px) {
+  .axis { font-size: 20px; }
+}
+.axis--x { text-anchor: middle; }
+
+.bar--purchase { fill: var(--series-purchase); }
+.bar--sale { fill: var(--series-sale); }
+
+g { transition: opacity 0.15s ease; }
+g.is-dim { opacity: 0.35; }
+
+.hit {
+  fill: transparent;
+  cursor: default;
+  outline: none;
+
+  &:focus-visible { stroke: var(--green); stroke-width: 1.5; }
+}
+
+.tooltip {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  min-width: 170px;
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.tooltip__title {
+  margin-bottom: 4px;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.tooltip__row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--body);
+  font-size: 12px;
+
+  strong {
+    margin-left: auto;
+    padding-left: 12px;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.empty-note {
+  padding: 60px 12px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th,
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+
+  thead th {
+    color: var(--ink);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  tbody th { color: var(--ink); font-weight: 500; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+}

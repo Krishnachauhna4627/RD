@@ -1,0 +1,76 @@
+<div class="chart-head">
+  <ul class="legend" aria-label="Legend">
+    <li><span class="swatch swatch--purchase" aria-hidden="true"></span>Purchases</li>
+    <li><span class="swatch swatch--sale" aria-hidden="true"></span>Sales</li>
+  </ul>
+  <button class="view-toggle" type="button" [attr.aria-pressed]="showTable()" (click)="showTable.set(!showTable())">
+    {{ showTable() ? 'View as chart' : 'View as table' }}
+  </button>
+</div>
+
+@if (showTable()) {
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th scope="col">Month</th>
+        <th scope="col" class="num">Purchases</th>
+        <th scope="col" class="num">Sales</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (point of points(); track point.title) {
+        <tr>
+          <th scope="row">{{ point.title }}</th>
+          <td class="num">{{ inr(point.purchases) }}</td>
+          <td class="num">{{ inr(point.sales) }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+} @else if (isEmpty()) {
+  <p class="empty-note">No purchases or sales in this period yet.</p>
+} @else {
+  <div class="plot" (mouseleave)="active.set(null)">
+    <svg [attr.viewBox]="'0 0 ' + W + ' ' + H" role="img" aria-label="Purchases and sales by month">
+      <!-- Recessive grid and axis labels -->
+      @for (tick of scale().ticks; track tick) {
+        <line class="grid" [class.grid--base]="tick === 0"
+              [attr.x1]="PAD.left" [attr.x2]="W - PAD.right" [attr.y1]="y(tick)" [attr.y2]="y(tick)" />
+        <text class="axis axis--y" [attr.x]="PAD.left - 8" [attr.y]="y(tick)" dy="0.32em">{{ tickLabel(tick) }}</text>
+      }
+
+      @for (point of points(); track point.title; let i = $index) {
+        <g [class.is-dim]="active() !== null && active() !== i">
+          <path class="bar bar--purchase" [attr.d]="barPath(i, point.purchases, false)" />
+          <path class="bar bar--sale" [attr.d]="barPath(i, point.sales, true)" />
+        </g>
+        <text class="axis axis--x" [attr.x]="centerX(i)" [attr.y]="H - 8">{{ point.label }}</text>
+
+        <!-- Hit target: the whole band, far bigger than the bars themselves. -->
+        <rect
+          class="hit"
+          tabindex="0"
+          [attr.x]="bandX(i)"
+          [attr.y]="PAD.top"
+          [attr.width]="band()"
+          [attr.height]="H - PAD.top - PAD.bottom"
+          [attr.aria-label]="barLabel(point)"
+          (mouseenter)="active.set(i)"
+          (focus)="active.set(i)"
+          (blur)="active.set(null)"
+        />
+      }
+    </svg>
+
+    @if (active() !== null) {
+      @let point = points()[active()!];
+      <div class="tooltip" role="status" [style.left.%]="tooltipLeft(active()!)">
+        <p class="tooltip__title">{{ point.title }}</p>
+        <p class="tooltip__row"><span class="swatch swatch--purchase" aria-hidden="true"></span>Purchases
+          <strong>{{ inr(point.purchases) }}</strong></p>
+        <p class="tooltip__row"><span class="swatch swatch--sale" aria-hidden="true"></span>Sales
+          <strong>{{ inr(point.sales) }}</strong></p>
+      </div>
+    }
+  </div>
+}

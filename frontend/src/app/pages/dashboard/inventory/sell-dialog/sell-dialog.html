@@ -1,0 +1,207 @@
+<div class="dialog">
+  <button class="dialog__scrim" type="button" tabindex="-1" aria-hidden="true" (click)="close()"></button>
+
+  <div class="dialog__card dialog__card--sell" role="dialog" aria-modal="true" aria-labelledby="sell-dialog-title">
+    <div class="dialog__head">
+      <h2 class="dialog__title" id="sell-dialog-title">New sale</h2>
+      <button class="dialog__close" type="button" aria-label="Close" (click)="close()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    @if (error()) {
+      <p class="dialog__error" role="alert">{{ error() }}</p>
+    }
+
+    <form class="dialog__form" (ngSubmit)="submit()">
+      <div class="top">
+        <label class="field field--date">
+          <span class="field__label">Sale date</span>
+          <input
+            class="field__input"
+            type="date"
+            name="date"
+            required
+            [disabled]="saving()"
+            [ngModel]="date()"
+            (ngModelChange)="date.set($event)"
+          />
+        </label>
+
+        <label class="field field--customer">
+          <span class="field__label">Customer</span>
+          <select
+            class="field__input customer-select"
+            name="customer"
+            required
+            [disabled]="saving()"
+            [ngModel]="customerId()"
+            (ngModelChange)="chooseCustomer($event)"
+          >
+            <option [ngValue]="null" disabled>
+              {{ customersLoading() ? 'Loading customers…' : 'Select a customer' }}
+            </option>
+            @for (customer of customers(); track customer.id) {
+              <option [ngValue]="customer.id">
+                {{ customer.customer_name }}{{ customer.city ? ' — ' + customer.city : '' }}
+              </option>
+            }
+          </select>
+          @if (!customersLoading() && customers().length === 0) {
+            <span class="field__note">No active customers. Add one on the Customers page first.</span>
+          }
+        </label>
+      </div>
+
+      <div class="lines" [class.is-locked]="customerId() === null">
+        <table class="lines__table">
+          <thead>
+            <tr>
+              <th scope="col" class="col-no">#</th>
+              <th scope="col" class="col-product">Product</th>
+              <th scope="col" class="col-unit">Unit</th>
+              <th scope="col" class="col-num">Quantity</th>
+              <th scope="col" class="col-num">Rate (₹)</th>
+              <th scope="col" class="col-num">Total (₹)</th>
+              <th scope="col" class="col-prev">Previous rate</th>
+              <th scope="col" class="col-remove"><span class="visually-hidden">Remove</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (line of lines(); track line.key; let i = $index) {
+              <tr>
+                <td class="col-no">{{ i + 1 }}</td>
+                <td class="col-product">
+                  <app-product-picker
+                    [products]="products()"
+                    [value]="line.productId"
+                    [disabledIds]="takenElsewhere(line)"
+                    [disabled]="saving() || customerId() === null"
+                    [placeholder]="customerId() === null ? 'Choose a customer first' : productsLoading() ? 'Loading products…' : 'Type to search products'"
+                    [ariaLabel]="'Product for row ' + (i + 1)"
+                    [attr.data-picker]="line.key"
+                    (picked)="pickProduct(line, $event)"
+                  />
+                </td>
+                <td class="col-unit">
+                  <span class="unit" [class.is-empty]="line.productId === null">{{ unitOf(line) }}</span>
+                </td>
+                <td class="col-num">
+                  <input
+                    class="cell-input cell-num"
+                    type="number"
+                    min="0"
+                    step="any"
+                    inputmode="decimal"
+                    placeholder="0"
+                    [class.is-over]="overStock(line)"
+                    [attr.data-qty]="line.key"
+                    [attr.aria-label]="'Quantity for row ' + (i + 1)"
+                    [ngModelOptions]="{ standalone: true }"
+                    [disabled]="saving() || customerId() === null"
+                    [ngModel]="line.quantity"
+                    (ngModelChange)="update(line, { quantity: $event })"
+                  />
+                  @if (line.productId !== null) {
+                    <span class="stock" [class.is-over]="overStock(line)">
+                      @if (overStock(line)) {
+                        Only {{ (stockOf(line) ?? 0) | number: '1.0-3' }} in stock
+                      } @else {
+                        {{ (stockOf(line) ?? 0) | number: '1.0-3' }} in stock
+                      }
+                    </span>
+                  }
+                </td>
+                <td class="col-num">
+                  <input
+                    class="cell-input cell-num"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    inputmode="decimal"
+                    placeholder="0.00"
+                    [class.is-auto]="line.rateAuto"
+                    [attr.aria-label]="'Rate for row ' + (i + 1)"
+                    [ngModelOptions]="{ standalone: true }"
+                    [disabled]="saving() || customerId() === null"
+                    [ngModel]="line.rate"
+                    (ngModelChange)="typeRate(line, $event)"
+                    (keydown.enter)="$event.preventDefault(); nextRow(line)"
+                  />
+                </td>
+                <td class="col-num line-total">{{ lineTotal(line) | number: '1.2-2' }}</td>
+                <td class="col-prev">
+                  @if (line.productId === null) {
+                    <span class="prev prev--none">—</span>
+                  } @else if (loadingPrevious()) {
+                    <span class="prev prev--none">Loading…</span>
+                  } @else {
+                    @let prev = previousOf(line);
+                    @if (prev?.saved != null || prev?.last != null) {
+                      @if (prev?.saved != null) {
+                        <span class="prev">Saved ₹{{ prev!.saved | number: '1.2-2' }}</span>
+                      }
+                      @if (prev?.last != null) {
+                        <span class="prev prev--last">
+                          Last ₹{{ prev!.last | number: '1.2-2' }} · {{ prev!.lastDate | date: 'd MMM' }}
+                        </span>
+                      }
+                    } @else {
+                      <span class="prev prev--none">No previous rate</span>
+                    }
+                  }
+                </td>
+                <td class="col-remove">
+                  <button
+                    class="icon-btn"
+                    type="button"
+                    [attr.aria-label]="'Remove row ' + (i + 1)"
+                    [disabled]="saving()"
+                    (click)="removeLine(line)"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="5" class="grand__label">Grand total</td>
+              <td class="col-num grand__value">₹{{ grandTotal() | number: '1.2-2' }}</td>
+              <td colspan="2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <button
+        class="btn btn--ghost add-line"
+        type="button"
+        [disabled]="saving() || customerId() === null"
+        (click)="addLine(true)"
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Add another product
+      </button>
+      <p class="hint">The rate fills in from the customer's saved rate, or their last price. Type over it to change it.
+        <kbd>Enter</kbd> in a rate box moves to the next row.</p>
+
+      <div class="dialog__actions">
+        <button class="btn btn--ghost" type="button" [disabled]="saving()" (click)="close()">Cancel</button>
+        <button class="btn btn--primary" type="submit" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : 'Save sale' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

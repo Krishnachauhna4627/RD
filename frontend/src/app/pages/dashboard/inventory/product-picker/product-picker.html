@@ -1,0 +1,54 @@
+<input
+  #field
+  class="picker__input"
+  type="text"
+  role="combobox"
+  autocomplete="off"
+  spellcheck="false"
+  aria-autocomplete="list"
+  [attr.aria-label]="ariaLabel()"
+  [attr.aria-expanded]="open()"
+  [attr.aria-controls]="listId"
+  [attr.aria-activedescendant]="open() && active() >= 0 ? optionId(active()) : null"
+  [placeholder]="selected() ? labelOf(selected()) : placeholder()"
+  [disabled]="disabled()"
+  [value]="text()"
+  (focus)="show()"
+  (click)="show()"
+  (blur)="hide()"
+  (input)="onInput($any($event.target).value)"
+  (keydown)="onKeydown($event)"
+/>
+
+@if (open()) {
+  <ul
+    class="picker__list"
+    role="listbox"
+    [id]="listId"
+    [style.top.px]="position().top"
+    [style.left.px]="position().left"
+    [style.width.px]="position().width"
+  >
+    @for (product of matches(); track product.id; let i = $index) {
+      <li
+        class="picker__option"
+        role="option"
+        [id]="optionId(i)"
+        [class.is-active]="i === active()"
+        [class.is-selected]="product.id === value()"
+        [attr.aria-selected]="product.id === value()"
+        [attr.aria-disabled]="isDisabled(product)"
+        (mousedown)="$event.preventDefault(); choose(product)"
+        (mouseenter)="!isDisabled(product) && active.set(i)"
+      >
+        <span class="picker__name">{{ product.name }}</span>
+        <span class="picker__meta">
+          {{ product.material_type }} · {{ product.category }} · {{ product.quantity_unit }}
+          @if (isDisabled(product)) { <em>· already added</em> }
+        </span>
+      </li>
+    } @empty {
+      <li class="picker__empty">No product matches “{{ query() }}”</li>
+    }
+  </ul>
+}

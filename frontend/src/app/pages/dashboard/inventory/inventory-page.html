@@ -1,0 +1,215 @@
+<div class="page-head">
+  <div>
+    <h1 class="page-head__title">Inventory</h1>
+    <p class="page-head__sub">Stock on hand: everything purchased, minus everything sold.</p>
+  </div>
+
+  <div class="page-actions">
+    <button class="btn btn--primary" type="button" (click)="open('purchase')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Purchase
+    </button>
+    <button class="btn btn--primary" type="button" (click)="open('sell')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6M9 21h.01M18 21h.01" />
+      </svg>
+      Sell
+    </button>
+  </div>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi">
+    <p class="kpi__label">Products in stock</p>
+    <p class="kpi__value">{{ productsInStock() }}</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi__label">Purchases</p>
+    <p class="kpi__value">{{ purchases().length }}</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi__label">Total spent</p>
+    <p class="kpi__value">₹{{ totalSpent() | number: '1.0-2' }}</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi__label">Sales</p>
+    <p class="kpi__value">{{ sales().length }}</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi__label">Total sold</p>
+    <p class="kpi__value">₹{{ totalSold() | number: '1.0-2' }}</p>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="panel">
+    <div class="empty">
+      <p class="empty__title">Could not load inventory</p>
+      <p class="empty__text">{{ error() }}</p>
+      <button class="btn btn--ghost" type="button" (click)="reload()">Try again</button>
+    </div>
+  </div>
+} @else if (loading() && !hasActivity()) {
+  <div class="panel">
+    <div class="empty">
+      <p class="empty__text">Loading inventory…</p>
+    </div>
+  </div>
+} @else if (!hasActivity()) {
+  <div class="panel">
+    <div class="empty">
+      <span class="empty__icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 8h18v12H3V8Zm0-4h18v4H3V4Zm7 8h4" />
+        </svg>
+      </span>
+      <p class="empty__title">Nothing in stock yet</p>
+      <p class="empty__text">Record a purchase and its products will show up here as stock.</p>
+      <button class="btn btn--primary" type="button" (click)="open('purchase')">Purchase</button>
+    </div>
+  </div>
+} @else {
+  <section class="panel panel--table">
+    <h2 class="section-title">Stock on hand</h2>
+
+    <div class="stock-filters">
+      <select class="sf-control sf-select sf-product" aria-label="Product" [ngModel]="stockProduct()"
+              (ngModelChange)="stockProduct.set($event)">
+        <option [ngValue]="null">All products</option>
+        @for (option of stockProducts(); track option.id) {
+          <option [ngValue]="option.id">{{ option.label }}</option>
+        }
+      </select>
+      <input
+        class="sf-control sf-search"
+        type="search"
+        placeholder="Search product…"
+        aria-label="Search stock"
+        [ngModel]="stockSearch()"
+        (ngModelChange)="stockSearch.set($event)"
+      />
+      <select class="sf-control sf-select" aria-label="Material" [ngModel]="stockMaterial()"
+              (ngModelChange)="stockMaterial.set($event)">
+        <option value="">All materials</option>
+        @for (option of stockMaterials(); track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+      <select class="sf-control sf-select" aria-label="Category" [ngModel]="stockCategory()"
+              (ngModelChange)="stockCategory.set($event)">
+        <option value="">All categories</option>
+        @for (option of stockCategories(); track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+      <select class="sf-control sf-select" aria-label="Stock status" [ngModel]="stockStatus()"
+              (ngModelChange)="stockStatus.set($event)">
+        <option value="">Any stock level</option>
+        <option value="in">In stock</option>
+        <option value="low">Low ({{ lowStockAt }} or fewer)</option>
+        <option value="out">Out of stock</option>
+      </select>
+      <button class="btn btn--ghost sf-clear" type="button" [disabled]="!stockFiltersActive()"
+              (click)="clearStockFilters()">
+        Clear
+      </button>
+    </div>
+    <p class="sf-count">
+      @if (stockFiltersActive()) {
+        Showing {{ filteredStock().length }} of {{ stock().length }} products.
+      } @else {
+        {{ stock().length }} product{{ stock().length === 1 ? '' : 's' }}.
+      }
+    </p>
+
+    @if (filteredStock().length === 0) {
+      <div class="empty">
+        <p class="empty__title">No stock matches these filters</p>
+        <button class="btn btn--ghost" type="button" (click)="clearStockFilters()">Clear filters</button>
+      </div>
+    } @else {
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Product</th>
+          <th scope="col">Material</th>
+          <th scope="col">Category</th>
+          <th scope="col">Purchased</th>
+          <th scope="col">Sold</th>
+          <th scope="col">In stock</th>
+          <th scope="col">Last purchased</th>
+          <th scope="col">Last sold</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of filteredStock(); track row.product_id + row.quantity_unit) {
+          <tr>
+            <td class="table__name">{{ row.name }}</td>
+            <td><span class="tag">{{ row.material_type }}</span></td>
+            <td>{{ row.category }}</td>
+            <td class="qty">{{ row.purchased | number: '1.0-3' }}</td>
+            <td class="qty">{{ row.sold | number: '1.0-3' }}</td>
+            <td class="qty table__strong" [class.is-negative]="row.quantity < 0">
+              {{ row.quantity | number: '1.0-3' }} {{ row.quantity_unit }}
+            </td>
+            <td>{{ row.last_purchased ? (row.last_purchased | date: 'd MMM y') : '—' }}</td>
+            <td>{{ row.last_sold ? (row.last_sold | date: 'd MMM y') : '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+    }
+  </section>
+
+  <section class="panel panel--table">
+    <div class="tabs" role="tablist" aria-label="Details">
+      <button
+        class="tab"
+        type="button"
+        role="tab"
+        id="tab-purchase"
+        aria-controls="panel-purchase"
+        [class.is-active]="tab() === 'purchase'"
+        [attr.aria-selected]="tab() === 'purchase'"
+        (click)="tab.set('purchase')"
+      >
+        Purchase details
+        <span class="tab__count">{{ purchases().length }}</span>
+      </button>
+      <button
+        class="tab"
+        type="button"
+        role="tab"
+        id="tab-sell"
+        aria-controls="panel-sell"
+        [class.is-active]="tab() === 'sell'"
+        [attr.aria-selected]="tab() === 'sell'"
+        (click)="tab.set('sell')"
+      >
+        Sell details
+        <span class="tab__count">{{ sales().length }}</span>
+      </button>
+    </div>
+
+    <!-- Both stay alive and are hidden in turn, so each keeps its own filters. -->
+    <div role="tabpanel" id="panel-purchase" aria-labelledby="tab-purchase" [hidden]="tab() !== 'purchase'">
+      <app-ledger [rows]="purchaseRows()" noun="purchase" />
+    </div>
+    <div role="tabpanel" id="panel-sell" aria-labelledby="tab-sell" [hidden]="tab() !== 'sell'">
+      <app-ledger [rows]="saleRows()" noun="sale" [withCustomer]="true" />
+    </div>
+  </section>
+}
+
+@if (dialog() === 'purchase') {
+  <app-purchase-dialog (closed)="closeDialog()" />
+}
+
+@if (dialog() === 'sell') {
+  <app-sell-dialog (closed)="closeDialog()" />
+}

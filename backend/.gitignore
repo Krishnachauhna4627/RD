@@ -1,0 +1,12 @@
+node_modules/
+dist/
+
+# Real credentials — never commit. The template .env.example is committed instead.
+.env
+.env.local
+.env.*.local
+
+# Contains the generated database password in plain text.
+setup-database.sql
+
+*.log

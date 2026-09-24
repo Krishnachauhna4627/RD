@@ -1,0 +1,140 @@
+.dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.dialog__scrim {
+  position: fixed;
+  inset: 0;
+  padding: 0;
+  border: 0;
+  background: rgb(13 27 33 / 55%);
+  cursor: default;
+}
+
+.dialog__card {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  padding: 24px 26px 26px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-md);
+  animation: dialog-rise 0.2s ease;
+}
+
+@keyframes dialog-rise {
+  from { transform: translateY(10px); opacity: 0; }
+}
+
+.dialog__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.dialog__title { font-size: 19px; }
+
+.dialog__close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--body);
+
+  &:hover { background: var(--green-soft); color: var(--green); }
+}
+
+.dialog__error {
+  margin-top: 14px;
+  padding: 10px 13px;
+  border: 1px solid #f3c9c4;
+  border-radius: 4px;
+  background: #fdecea;
+  color: #8f2b24;
+  font-size: 13px;
+}
+
+.dialog__form {
+  display: grid;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.field { display: grid; gap: 7px; }
+
+.field__label {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.field__input {
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+
+  &::placeholder { color: #9aa8ad; }
+
+  &:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px var(--green-soft);
+  }
+
+  &[disabled] {
+    background: var(--surface-alt);
+    cursor: not-allowed;
+  }
+}
+
+.field__select {
+  appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5l5-5' stroke='%235b6b72' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 13px center;
+}
+
+.field__warn {
+  padding: 8px 11px;
+  border: 1px solid #f1dca0;
+  border-radius: 4px;
+  background: #fff8e1;
+  color: #7a5b00;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.dialog__actions .btn[disabled] {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+@media (max-width: 480px) {
+  .dialog__card { padding: 20px 18px 22px; }
+  .dialog__actions .btn { flex: 1; justify-content: center; }
+}

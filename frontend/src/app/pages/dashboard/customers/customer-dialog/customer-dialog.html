@@ -1,0 +1,158 @@
+<div class="dialog">
+  <button class="dialog__scrim" type="button" tabindex="-1" aria-hidden="true" (click)="close()"></button>
+
+  <div class="dialog__card" role="dialog" aria-modal="true" aria-labelledby="customer-dialog-title">
+    <div class="dialog__head">
+      <h2 class="dialog__title" id="customer-dialog-title">{{ editing() ? 'Edit customer' : 'Add customer' }}</h2>
+      <button class="dialog__close" type="button" aria-label="Close" (click)="close()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    @if (error()) {
+      <p class="dialog__error" role="alert">{{ error() }}</p>
+    }
+
+    <form class="dialog__form" (ngSubmit)="submit()">
+      <label class="field field--wide">
+        <span class="field__label">Customer name <span class="req" aria-hidden="true">*</span></span>
+        <input
+          class="field__input"
+          type="text"
+          name="customerName"
+          placeholder="e.g. Sharma Caterers or Ramesh Sharma"
+          maxlength="160"
+          required
+          autofocus
+          [disabled]="saving()"
+          [ngModel]="form().customerName"
+          (ngModelChange)="set('customerName', $event)"
+        />
+      </label>
+
+      <fieldset class="field field--wide choice" [disabled]="saving()">
+        <legend class="field__label">Regular customer? <span class="req" aria-hidden="true">*</span></legend>
+        <div class="choice__options">
+          <label class="choice__option" [class.is-checked]="form().isRegular === true">
+            <input type="radio" name="isRegular" required [checked]="form().isRegular === true"
+                   (change)="setRegular(true)" />
+            Yes, regular
+          </label>
+          <label class="choice__option" [class.is-checked]="form().isRegular === false">
+            <input type="radio" name="isRegular" required [checked]="form().isRegular === false"
+                   (change)="setRegular(false)" />
+            No, not regular
+          </label>
+        </div>
+      </fieldset>
+
+      <label class="field">
+        <span class="field__label">Contact person</span>
+        <input
+          class="field__input"
+          type="text"
+          name="contactPerson"
+          placeholder="e.g. Ramesh Sharma"
+          maxlength="120"
+          autocomplete="off"
+          [disabled]="saving()"
+          [ngModel]="form().contactPerson"
+          (ngModelChange)="set('contactPerson', $event)"
+        />
+      </label>
+
+      <label class="field">
+        <span class="field__label">Phone <span class="req" aria-hidden="true">*</span></span>
+        <input
+          class="field__input"
+          type="tel"
+          name="phone"
+          inputmode="tel"
+          placeholder="e.g. 98765 43210"
+          maxlength="24"
+          required
+          autocomplete="off"
+          [disabled]="saving()"
+          [ngModel]="form().phone"
+          (ngModelChange)="set('phone', $event)"
+        />
+      </label>
+
+      <label class="field">
+        <span class="field__label">Email</span>
+        <input
+          class="field__input"
+          type="email"
+          name="email"
+          placeholder="name@example.com"
+          maxlength="160"
+          autocomplete="off"
+          [disabled]="saving()"
+          [ngModel]="form().email"
+          (ngModelChange)="set('email', $event)"
+        />
+      </label>
+
+      <label class="field">
+        <span class="field__label">City</span>
+        <input
+          class="field__input"
+          type="text"
+          name="city"
+          list="customer-cities"
+          placeholder="e.g. Pune"
+          maxlength="80"
+          autocomplete="off"
+          [disabled]="saving()"
+          [ngModel]="form().city"
+          (ngModelChange)="set('city', $event)"
+        />
+        <datalist id="customer-cities">
+          @for (city of cities(); track city) {
+            <option [value]="city"></option>
+          }
+        </datalist>
+      </label>
+
+      <label class="field field--wide">
+        <span class="field__label">Address</span>
+        <textarea
+          class="field__input field__textarea"
+          name="address"
+          rows="2"
+          placeholder="Shop number, street, area"
+          maxlength="255"
+          [disabled]="saving()"
+          [ngModel]="form().address"
+          (ngModelChange)="set('address', $event)"
+        ></textarea>
+      </label>
+
+      <label class="field">
+        <span class="field__label">GSTIN</span>
+        <input
+          class="field__input field__mono"
+          type="text"
+          name="gstin"
+          placeholder="27ABCDE1234F1Z5"
+          maxlength="15"
+          autocomplete="off"
+          spellcheck="false"
+          [disabled]="saving()"
+          [ngModel]="form().gstin"
+          (ngModelChange)="set('gstin', $event.toUpperCase())"
+        />
+      </label>
+
+      <div class="dialog__actions">
+        <button class="btn btn--ghost" type="button" [disabled]="saving()" (click)="close()">Cancel</button>
+        <button class="btn btn--primary" type="submit" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : editing() ? 'Save changes' : 'Add customer' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
