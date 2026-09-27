@@ -87,10 +87,10 @@ export class OverviewPage {
 
   /** Products in their current unit, with their stock (0 if never stocked). */
   private readonly productStock = computed(() => {
-    const byKey = new Map(this.stock().map((s) => [`${s.product_id}|${s.quantity_unit}`, s]));
+    const byId = new Map(this.stock().map((s) => [s.product_id, s]));
     return this.productsService.products().map((p) => ({
       product: p,
-      row: byKey.get(`${p.id}|${p.quantity_unit}`) ?? null,
+      row: byId.get(p.id) ?? null,
     }));
   });
 

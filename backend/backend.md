@@ -365,7 +365,8 @@ per unit box and fills it in.
 
 ### `GET /api/purchases/stock`
 
-Requires a token. Stock on hand per product (and unit): `purchased`, `sold`,
+Requires a token. Stock on hand, one row per product in its current `quantity_unit`
+(lines entered under an older unit still count towards it): `purchased`, `sold`,
 `quantity` (purchased − sold), `total_spent`, `last_purchased` and `last_sold`.
 `quantity` can go negative if a sale was entered before its purchase. The API allows
 that on purpose, and the dashboard warns instead of blocking the sale.

@@ -147,7 +147,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (row of filteredStock(); track row.product_id + row.quantity_unit) {
+        @for (row of filteredStock(); track row.product_id) {
           <tr>
             <td class="table__name">{{ row.name }}</td>
             <td><span class="tag">{{ row.material_type }}</span></td>

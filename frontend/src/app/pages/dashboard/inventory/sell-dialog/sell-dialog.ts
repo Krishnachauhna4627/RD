@@ -88,10 +88,8 @@ export class SellDialog {
 
   private readonly productById = computed(() => new Map(this.products().map((p) => [p.id, p])));
 
-  /** Stock by "productId|unit", matching how the stock API groups it. */
-  private readonly stockByKey = computed(
-    () => new Map(this.purchases.stock().map((s) => [`${s.product_id}|${s.quantity_unit}`, s.quantity])),
-  );
+  /** Stock by product id; the stock API returns one row per product. */
+  private readonly stockById = computed(() => new Map(this.purchases.stock().map((s) => [s.product_id, s.quantity])));
 
   protected readonly grandTotal = computed(() =>
     this.lines().reduce((sum, line) => sum + this.lineTotal(line), 0),
@@ -115,8 +113,7 @@ export class SellDialog {
   /** Stock on hand in the product's current unit, or null when it has never been stocked. */
   protected stockOf(line: Line): number | null {
     if (line.productId === null) return null;
-    const unit = this.productById().get(line.productId)?.quantity_unit;
-    return this.stockByKey().get(`${line.productId}|${unit}`) ?? null;
+    return this.stockById().get(line.productId) ?? null;
   }
 
   protected overStock(line: Line): boolean {
