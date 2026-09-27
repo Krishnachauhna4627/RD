@@ -10,8 +10,8 @@ export interface LedgerRow {
   date: string;
   /** Bill number, so lines from the same bill can be told apart. */
   billId: number;
-  /** Only set for sales. */
-  customerName: string | null;
+  /** The customer on a sale, or the supplier on a purchase; null on old purchases without one. */
+  partyName: string | null;
   productName: string;
   material: string;
   category: string;
@@ -36,8 +36,8 @@ type Preset = 'all' | 'today' | 'week' | 'month';
 })
 export class Ledger {
   readonly rows = input.required<readonly LedgerRow[]>();
-  /** Shows the customer column and filter; on for sales. */
-  readonly withCustomer = input(false);
+  /** Heading for the customer / supplier column and filter, e.g. "Customer". */
+  readonly partyLabel = input.required<string>();
   /** Used in headings and empty states: "purchase" or "sale". */
   readonly noun = input.required<string>();
 
@@ -45,7 +45,7 @@ export class Ledger {
   protected readonly to = signal('');
   protected readonly search = signal('');
   protected readonly material = signal('');
-  protected readonly customer = signal('');
+  protected readonly party = signal('');
 
   protected readonly presets: { value: Preset; label: string }[] = [
     { value: 'today', label: 'Today' },
@@ -56,8 +56,8 @@ export class Ledger {
 
   protected readonly materialOptions = computed(() => [...new Set(this.rows().map((r) => r.material))].sort());
 
-  protected readonly customerOptions = computed(() =>
-    [...new Set(this.rows().map((r) => r.customerName).filter((c): c is string => !!c))].sort((a, b) =>
+  protected readonly partyOptions = computed(() =>
+    [...new Set(this.rows().map((r) => r.partyName).filter((c): c is string => !!c))].sort((a, b) =>
       a.localeCompare(b, undefined, { sensitivity: 'base' }),
     ),
   );
@@ -67,7 +67,7 @@ export class Ledger {
     const to = this.to();
     const words = this.search().toLowerCase().split(/\s+/).filter(Boolean);
     const material = this.material();
-    const customer = this.customer();
+    const party = this.party();
 
     return this.rows()
       .filter((r) => {
@@ -75,8 +75,8 @@ export class Ledger {
         if (from && r.date < from) return false;
         if (to && r.date > to) return false;
         if (material && r.material !== material) return false;
-        if (customer && r.customerName !== customer) return false;
-        const haystack = `${r.productName} ${r.material} ${r.category} ${r.customerName ?? ''}`.toLowerCase();
+        if (party && r.partyName !== party) return false;
+        const haystack = `${r.productName} ${r.material} ${r.category} ${r.partyName ?? ''}`.toLowerCase();
         return words.every((word) => haystack.includes(word));
       })
       .sort((a, b) => b.date.localeCompare(a.date) || b.billId - a.billId || a.key - b.key);
@@ -86,7 +86,7 @@ export class Ledger {
   protected readonly billCount = computed(() => new Set(this.filtered().map((r) => r.billId)).size);
 
   protected readonly filtersActive = computed(
-    () => !!(this.from() || this.to() || this.search() || this.material() || this.customer()),
+    () => !!(this.from() || this.to() || this.search() || this.material() || this.party()),
   );
 
   /** Which preset the current dates match, if any, so its chip can light up. */
@@ -110,7 +110,7 @@ export class Ledger {
     this.to.set('');
     this.search.set('');
     this.material.set('');
-    this.customer.set('');
+    this.party.set('');
   }
 
   /** Rows after the first of a bill get a lighter date, so bills read as groups. */

@@ -44,7 +44,7 @@ interface PreviousRate {
   imports: [FormsModule, DecimalPipe, DatePipe, ProductPicker],
   selector: 'app-sell-dialog',
   templateUrl: './sell-dialog.html',
-  styleUrls: ['../purchase-dialog/purchase-dialog.scss', './sell-dialog.scss'],
+  styleUrls: ['../purchase-dialog/purchase-dialog.scss', '../party-fields.scss', './sell-dialog.scss'],
 })
 export class SellDialog {
   private readonly productsService = inject(ProductsService);

@@ -208,6 +208,9 @@ One purchase is one bill: `purchase_date` (DATE), `total_amount` (DECIMAL 12,2) 
 `quantity` (DECIMAL 12,3, so weights like 2.5 Kg work), `quantity_unit` (copied from
 the product at purchase time), `unit_price` and `line_total`.
 
+`supplier_id` points at the supplier (`RESTRICT`). The API requires it on new purchases;
+it is NULL only on bills entered before purchases recorded a supplier.
+
 Deleting a purchase deletes its lines. A product with purchase lines **cannot be
 deleted** (FK `RESTRICT`), and the API answers 409 instead.
 
@@ -221,6 +224,13 @@ different numbers.
 
 `is_active` (default true) marks whether the customer still orders. Deactivating
 keeps the record; it is changed only through the status endpoint, never by `PUT`.
+
+### `suppliers`
+
+Businesses stock is bought from. Same fields and rules as `customers` (required
+`supplier_name` and unique `phone`; optional `contact_person`, `email`, `city`,
+`address`, `gstin`; `is_active` changed only through the status endpoint), but no
+`is_regular` and no rates.
 
 ### `customer_rates`
 
@@ -336,15 +346,22 @@ Requires a token. Every purchase, newest date first, each with its `items`
 Requires a token.
 
 ```json
-{ "purchaseDate": "2026-09-23",
+{ "purchaseDate": "2026-09-23", "supplierId": 2,
   "items": [ { "productId": 8, "quantity": 100, "unitPrice": 1.25 } ] }
 ```
 
 **201** `{ "purchase": { ..., "items": [ ... ] } }`
-**400** — bad date, no items, quantity ≤ 0, negative price, or an unknown product
+**400** — bad date, no supplier, an inactive or missing supplier, no items, quantity ≤ 0,
+negative price, or an unknown product
 
 Line and bill totals are computed on the server, rounded to 2 decimals. Totals
 sent by the client are ignored.
+
+### `GET /api/purchases/last-prices?supplierId=N`
+
+Requires a token. For each product ever bought from that supplier, the `unit_price` and
+`purchase_date` of the most recent purchase. The purchase dialog shows it next to the
+per unit box and fills it in.
 
 ### `GET /api/purchases/stock`
 
@@ -465,6 +482,18 @@ Requires a token. `{ "isActive": false }` to deactivate, `true` to reactivate.
 **200** `{ "customer": { ... } }`
 **400** — `isActive` missing or not true/false
 **404** — no customer with that id
+
+### `GET /api/suppliers` · `POST /api/suppliers` · `PUT /api/suppliers/:id` · `PATCH /api/suppliers/:id/status`
+
+Require a token. Same behaviour and status codes as the matching customer
+endpoints, with `supplierName` in place of `customerName` and no `isRegular`.
+
+```json
+{ "supplierName": "Shree Packaging Industries", "contactPerson": "Anil Mehta",
+  "phone": "98220 12345", "email": "", "city": "Pune", "address": "", "gstin": "" }
+```
+
+Responses are `{ "suppliers": [...] }` for the list and `{ "supplier": { ... } }` otherwise.
 
 ### `GET /api/customers/:id/rates`
 

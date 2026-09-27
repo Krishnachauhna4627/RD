@@ -7,6 +7,7 @@ import { customersRouter } from './routes/customers.js';
 import { productsRouter } from './routes/products.js';
 import { purchasesRouter } from './routes/purchases.js';
 import { salesRouter } from './routes/sales.js';
+import { suppliersRouter } from './routes/suppliers.js';
 import { errorHandler, notFound } from './middleware/error.js';
 import { pool } from './db/pool.js';
 
@@ -36,6 +37,7 @@ export function createApp() {
   app.use('/api/purchases', purchasesRouter);
   app.use('/api/sales', salesRouter);
   app.use('/api/customers', customersRouter);
+  app.use('/api/suppliers', suppliersRouter);
 
   app.use(notFound);
   app.use(errorHandler);

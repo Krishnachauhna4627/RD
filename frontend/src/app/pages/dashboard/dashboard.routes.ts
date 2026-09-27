@@ -33,6 +33,11 @@ export const dashboardRoutes: Routes = [
         title: 'Customers · RD Dashboard',
         loadComponent: () => import('./customers/customers-page').then((m) => m.CustomersPage),
       },
+      {
+        path: 'suppliers',
+        title: 'Suppliers · RD Dashboard',
+        loadComponent: () => import('./suppliers/suppliers-page').then((m) => m.SuppliersPage),
+      },
     ],
   },
 ];

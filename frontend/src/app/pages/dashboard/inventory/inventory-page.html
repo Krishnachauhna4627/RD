@@ -198,10 +198,10 @@
 
     <!-- Both stay alive and are hidden in turn, so each keeps its own filters. -->
     <div role="tabpanel" id="panel-purchase" aria-labelledby="tab-purchase" [hidden]="tab() !== 'purchase'">
-      <app-ledger [rows]="purchaseRows()" noun="purchase" />
+      <app-ledger [rows]="purchaseRows()" noun="purchase" partyLabel="Supplier" />
     </div>
     <div role="tabpanel" id="panel-sell" aria-labelledby="tab-sell" [hidden]="tab() !== 'sell'">
-      <app-ledger [rows]="saleRows()" noun="sale" [withCustomer]="true" />
+      <app-ledger [rows]="saleRows()" noun="sale" partyLabel="Customer" />
     </div>
   </section>
 }

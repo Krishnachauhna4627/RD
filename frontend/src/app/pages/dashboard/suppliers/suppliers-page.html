@@ -1,0 +1,201 @@
+<div class="page-head">
+  <div>
+    <h1 class="page-head__title">Suppliers</h1>
+    <p class="page-head__sub">Businesses RD Enterprises buys stock from.</p>
+  </div>
+
+  <button class="btn btn--primary" type="button" (click)="openDialog()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" />
+    </svg>
+    Add supplier
+  </button>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi">
+    <p class="kpi__label">Suppliers</p>
+    <p class="kpi__value">{{ total() }}</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi__label">Active</p>
+    <p class="kpi__value">{{ activeCount() }}</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi__label">Cities</p>
+    <p class="kpi__value">{{ cityCount() }}</p>
+  </div>
+  <div class="kpi">
+    <p class="kpi__label">New this week</p>
+    <p class="kpi__value">{{ newThisWeek() }}</p>
+  </div>
+</div>
+
+@if (error()) {
+  <div class="panel">
+    <div class="empty">
+      <p class="empty__title">Could not load suppliers</p>
+      <p class="empty__text">{{ error() }}</p>
+      <button class="btn btn--ghost" type="button" (click)="reload()">Try again</button>
+    </div>
+  </div>
+} @else if (loading() && total() === 0) {
+  <div class="panel">
+    <div class="empty">
+      <p class="empty__text">Loading suppliers…</p>
+    </div>
+  </div>
+} @else if (total() === 0) {
+  <div class="panel">
+    <div class="empty">
+      <span class="empty__icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M16 20v-2a4 4 0 0 0-8 0v2M12 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+        </svg>
+      </span>
+      <p class="empty__title">No suppliers yet</p>
+      <p class="empty__text">Add your first supplier and they will show up in this list.</p>
+      <button class="btn btn--primary" type="button" (click)="openDialog()">Add supplier</button>
+    </div>
+  </div>
+} @else {
+  <div class="panel panel--table">
+    <div class="toolbar">
+      <label class="search">
+        <span class="visually-hidden">Search suppliers</span>
+        <svg class="search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+        </svg>
+        <input
+          class="search__input"
+          type="search"
+          placeholder="Search name, phone, email, GSTIN…"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+        />
+      </label>
+
+      <label class="filter">
+        <span class="visually-hidden">Status</span>
+        <select class="filter__select" [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event)">
+          <option value="">Active and inactive</option>
+          <option value="active">Active only</option>
+          <option value="inactive">Inactive only</option>
+        </select>
+      </label>
+
+
+      <label class="filter">
+        <span class="visually-hidden">City</span>
+        <select class="filter__select" [ngModel]="filterCity()" (ngModelChange)="filterCity.set($event)">
+          <option value="">All cities</option>
+          @for (city of cityOptions(); track city) {
+            <option [value]="city">{{ city }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <p class="toolbar__count">
+      @if (filtersActive()) {
+        Showing {{ shown() }} of {{ total() }} suppliers.
+      } @else {
+        {{ total() }} supplier{{ total() === 1 ? '' : 's' }}.
+      }
+    </p>
+
+    @if (statusError()) {
+      <p class="status-error" role="alert">{{ statusError() }}</p>
+    }
+
+    @if (shown() === 0) {
+      <div class="empty">
+        <p class="empty__title">No suppliers match</p>
+        <p class="empty__text">Try a different search, or clear the filters.</p>
+        <button class="btn btn--ghost" type="button" (click)="clearFilters()">Clear filters</button>
+      </div>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Supplier</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Email</th>
+            <th scope="col">City</th>
+            <th scope="col">GSTIN</th>
+            <th scope="col">Added</th>
+            <th scope="col"><span class="visually-hidden">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (supplier of filtered(); track supplier.id) {
+            <tr [class.is-inactive]="!supplier.is_active">
+              <td>
+                <p class="table__name">
+                  {{ supplier.supplier_name }}
+                  @if (!supplier.is_active) {
+                    <span class="badge badge--inactive">Inactive</span>
+                  }
+                </p>
+                @if (supplier.contact_person || supplier.address) {
+                  <p class="table__sub">
+                    {{ supplier.contact_person }}
+                    @if (supplier.contact_person && supplier.address) { · }
+                    {{ supplier.address }}
+                  </p>
+                }
+              </td>
+              <td class="nowrap"><a class="link" [href]="'tel:' + supplier.phone">{{ formatPhone(supplier.phone) }}</a></td>
+              <td>
+                @if (supplier.email) {
+                  <a class="link" [href]="'mailto:' + supplier.email">{{ supplier.email }}</a>
+                } @else { <span class="muted">—</span> }
+              </td>
+              <td>{{ supplier.city ?? '—' }}</td>
+              <td class="mono">{{ supplier.gstin ?? '—' }}</td>
+              <td class="nowrap">{{ supplier.created_at.replace(' ', 'T') | date: 'd MMM y' }}</td>
+              <td class="actions">
+                <button
+                  class="edit-btn"
+                  type="button"
+                  [attr.aria-label]="'Edit ' + supplier.supplier_name"
+                  (click)="editSupplier(supplier)"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+                  </svg>
+                  Edit
+                </button>
+                <button
+                  class="edit-btn"
+                  type="button"
+                  [class.edit-btn--danger]="supplier.is_active"
+                  [disabled]="statusPending().has(supplier.id)"
+                  [attr.aria-label]="(supplier.is_active ? 'Deactivate ' : 'Activate ') + supplier.supplier_name"
+                  (click)="toggleActive(supplier)"
+                >
+                  @if (statusPending().has(supplier.id)) {
+                    Saving…
+                  } @else if (supplier.is_active) {
+                    Deactivate
+                  } @else {
+                    Activate
+                  }
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}
+
+
+@if (dialogOpen()) {
+  <app-supplier-dialog [supplier]="editingSupplier()" (closed)="closeDialog()" />
+}

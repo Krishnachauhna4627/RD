@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { catchError, forkJoin, map, tap, throwError, type Observable } from 'rxjs';
-import type { NewPurchase, Purchase, StockRow } from './purchase.models';
+import type { LastPurchasePrice, NewPurchase, Purchase, StockRow } from './purchase.models';
 
 @Injectable({ providedIn: 'root' })
 export class PurchasesService {
@@ -38,6 +38,15 @@ export class PurchasesService {
           this._loading.set(false);
         },
       });
+  }
+
+  lastPrices(supplierId: number): Observable<LastPurchasePrice[]> {
+    return this.http
+      .get<{ prices: LastPurchasePrice[] }>('/api/purchases/last-prices', { params: { supplierId } })
+      .pipe(
+        map(({ prices }) => prices),
+        catchError((error: HttpErrorResponse) => throwError(() => new Error(messageFor(error)))),
+      );
   }
 
   create(purchase: NewPurchase): Observable<Purchase> {

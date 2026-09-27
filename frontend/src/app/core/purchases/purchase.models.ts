@@ -14,6 +14,9 @@ export interface PurchaseItem {
 export interface Purchase {
   id: number;
   purchase_date: string;
+  /** Null only on bills entered before purchases recorded a supplier. */
+  supplier_id: number | null;
+  supplier_name: string | null;
   total_amount: number;
   created_by_username: string | null;
   created_at: string;
@@ -39,8 +42,16 @@ export interface StockRow {
   last_sold: string | null;
 }
 
+/** The last price a product was bought at from one supplier. */
+export interface LastPurchasePrice {
+  product_id: number;
+  unit_price: number;
+  purchase_date: string;
+}
+
 export interface NewPurchase {
   /** YYYY-MM-DD */
   purchaseDate: string;
+  supplierId: number;
   items: { productId: number; quantity: number; unitPrice: number }[];
 }

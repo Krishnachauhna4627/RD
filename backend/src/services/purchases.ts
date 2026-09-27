@@ -24,6 +24,8 @@ export interface PurchaseItemRow extends RowDataPacket {
 interface PurchaseHeaderRow extends RowDataPacket {
   id: number;
   purchase_date: string;
+  supplier_id: number | null;
+  supplier_name: string | null;
   total_amount: number;
   created_by: number | null;
   created_by_username: string | null;
@@ -33,10 +35,23 @@ interface PurchaseHeaderRow extends RowDataPacket {
 export interface Purchase {
   id: number;
   purchase_date: string;
+  /** Null only on bills entered before purchases recorded a supplier. */
+  supplier_id: number | null;
+  supplier_name: string | null;
   total_amount: number;
   created_by_username: string | null;
   created_at: string;
   items: PurchaseItemRow[];
+}
+
+export interface LastPriceRow extends RowDataPacket {
+  product_id: number;
+  unit_price: number;
+  purchase_date: string;
+}
+
+interface SupplierStateRow extends RowDataPacket {
+  is_active: number;
 }
 
 interface ProductUnitRow extends RowDataPacket {
@@ -57,16 +72,33 @@ export class UnknownProductError extends Error {
   }
 }
 
+/** Thrown when the supplier is missing or has been deactivated. */
+export class SupplierUnavailableError extends Error {
+  constructor(readonly reason: 'missing' | 'inactive') {
+    super(`Supplier is ${reason}`);
+    this.name = 'SupplierUnavailableError';
+  }
+}
+
 /**
  * Saves a purchase and its lines in one transaction. Line and bill totals are
  * computed here rather than trusted from the client.
  */
 export async function createPurchase(
   purchaseDate: string,
+  supplierId: number,
   lines: PurchaseLineInput[],
   createdBy: number | null,
 ): Promise<Purchase> {
   const purchaseId = await transaction(async (connection) => {
+    const [suppliers] = await connection.query<SupplierStateRow[]>(
+      'SELECT is_active FROM suppliers WHERE id = ?',
+      [supplierId],
+    );
+    const [supplier] = suppliers;
+    if (!supplier) throw new SupplierUnavailableError('missing');
+    if (!supplier.is_active) throw new SupplierUnavailableError('inactive');
+
     const ids = [...new Set(lines.map((line) => line.productId))];
     const [products] = await connection.query<ProductUnitRow[]>(
       'SELECT id, quantity_unit FROM products WHERE id IN (?)',
@@ -86,8 +118,8 @@ export async function createPurchase(
     const total = money(priced.reduce((sum, line) => sum + line.lineTotal, 0));
 
     const [header] = await connection.execute<ResultSetHeader>(
-      'INSERT INTO purchases (purchase_date, total_amount, created_by) VALUES (?, ?, ?)',
-      [purchaseDate, total, createdBy],
+      'INSERT INTO purchases (purchase_date, supplier_id, total_amount, created_by) VALUES (?, ?, ?, ?)',
+      [purchaseDate, supplierId, total, createdBy],
     );
 
     await connection.query(
@@ -113,8 +145,10 @@ export async function listPurchases(onlyId?: number): Promise<Purchase[]> {
   const params = onlyId === undefined ? [] : [onlyId];
 
   const headers = await query<PurchaseHeaderRow>(
-    `SELECT p.id, p.purchase_date, p.total_amount, p.created_by, u.username AS created_by_username, p.created_at
+    `SELECT p.id, p.purchase_date, p.supplier_id, sp.supplier_name, p.total_amount, p.created_by,
+            u.username AS created_by_username, p.created_at
        FROM purchases p
+       LEFT JOIN suppliers sp ON sp.id = p.supplier_id
        LEFT JOIN users u ON u.id = p.created_by
        ${where}
       ORDER BY p.purchase_date DESC, p.id DESC`,
@@ -143,4 +177,19 @@ export async function listPurchases(onlyId?: number): Promise<Purchase[]> {
     ...header,
     items: itemsByPurchase.get(header.id) ?? [],
   }));
+}
+
+/** The most recent price each product was bought at from this supplier. */
+export function listLastPrices(supplierId: number): Promise<LastPriceRow[]> {
+  return query<LastPriceRow>(
+    `SELECT product_id, unit_price, purchase_date
+       FROM (SELECT i.product_id, i.unit_price, p.purchase_date,
+                    ROW_NUMBER() OVER (PARTITION BY i.product_id
+                                       ORDER BY p.purchase_date DESC, p.id DESC, i.id DESC) AS rn
+               FROM purchase_items i
+               JOIN purchases p ON p.id = i.purchase_id
+              WHERE p.supplier_id = ?) latest
+      WHERE rn = 1`,
+    [supplierId],
+  );
 }
